@@ -47,6 +47,19 @@ server.on('upgrade', (req, socket) => {
   // Write the response back to the client socket, being sure to append two // additional newlines so that the browser recognises the end of the response // header and doesn't continue to wait for more header data: 
   socket.write(responseHeaders.join('\r\n') + '\r\n\r\n');
 
+  // Read the subprotocol from the client request headers:
+	const protocol = req.headers['sec-websocket-protocol'];
+	// If provided, they'll be formatted as a comma-delimited string of protocol
+	// names that the client supports; we'll need to parse the header value, if
+	// provided, and see what options the client is offering:
+	const protocols = !protocol ? [] : protocol.split(',').map(s => s.trim());
+	// To keep it simple, we'll just see if JSON was an option, and if so, include
+	// it in the HTTP response:
+	if (protocols.includes('json')) {
+	  // Tell the client that we agree to communicate with JSON data
+	  responseHeaders.push(`Sec-WebSocket-Protocol: json`);
+	}
+
 });
 
 function generateAcceptValue (acceptKey) {
