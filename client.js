@@ -1,14 +1,14 @@
 
 console.log("print");
 
-const ws = new WebSocket('ws://localhost:3000');
+const ws = new WebSocket('ws://localhost:3000', ['json', 'xml']);
 
 ws.addEventListener('open', () => {
   // Send a message to the WebSocket server
-  ws.sconst data = { message: 'Hello from the client!' }
+  const data = { message: 'Hello from the client!' }
   const json = JSON.stringify(data);
-  ws.send(json);end('Hello!');
-
+  ws.send(json);
+  console.log("open")
 });
 
 
@@ -18,5 +18,5 @@ ws.addEventListener('message', (event) => {
   // by the server is stored in the `data` property
   const data = JSON.parse(event.data);
   console.log(data);
-  
+
 });
