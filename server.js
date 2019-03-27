@@ -116,13 +116,17 @@ var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"][
 
 // establish connection with binance
 
+var response;
+
 var exchangeObjOne = new ccxt[context.selected_exchanges.exchange_1]()
 
 async function handleData (exchangeObj, symbol, interval, res) {
-	let response;
+	// let response;
 	try {
-		return response = await exchangeObj.fetchOHLCV(symbol, interval)
-		// console.log("I am the response", response)
+		response = await exchangeObj.fetchOHLCV(symbol, interval)
+		console.log("I am the response", response[0])
+		return response;
+
 	} catch (err) {
 		console.log ("error", err)
 
@@ -132,17 +136,37 @@ async function handleData (exchangeObj, symbol, interval, res) {
 
 // run the data pull for binance at the rate limit
 
-var dataReturn;
+// var dataReturn;
 
-setTimeout(function (){
+// setTimeout(function (){
 	
-	dataReturn = handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1);
-	console.log(dataReturn);
-	// print latest data
-	console.log("timer,",  exchangeObjOne.rateLimit);
-	// console.log(dataReturn[0]); 
+// 	dataReturn = handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1);
+// 	console.log(dataReturn);
+// 	// print latest data
+// 	console.log("timer,",  exchangeObjOne.rateLimit);
+// 	// console.log(dataReturn[0]); 
 
-}, exchangeObjOne.rateLimit)
+// }, exchangeObjOne.rateLimit)
+
+
+setInterval(function(){
+	console.log("good",
+		handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1, "1m")
+	)	
+}, 60000)
+
+
+// function timeout(ms) {
+//     return new Promise(resolve => setInterval(resolve, ms));
+// }
+// async function sleep() {
+//     await timeout(1000);
+//     console.log("running")
+//     // return handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1, "1m")
+//     // console.log(handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1, "1m"))
+// }
+
+// console.log("I am running", sleep());
 
 // console.log(handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1))
 
