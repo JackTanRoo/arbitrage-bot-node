@@ -34,14 +34,14 @@ context = {
 			"data_endpoint": "wss://feed.exchange.coinjar.com/socket/websocket",
 			"heartbeat_freq": 4500,
 			"heartbeat_message": '{ "topic": "phoenix", "event": "heartbeat", "payload": {}, "ref": 0 }',
-			"channel_sub": '{ "topic": "ticker:BTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }'
+			"channel_sub": '{ "topic": "ticker:LTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }'
 		}
 	},
 	"forex_parameters":{
 		"forex_api": "http://www.apilayer.net/api/live?access_key=97ec6af4d54ae75ef9cf190f8706b6c7&currencies="
 	},
 	"selected_trading_pairs": {
-		"crypto_1": "LTC/USD",
+		"crypto_1": "LTC/USDT",
 		"crypto_2": "LTC/AUD",
 		"fiat_1": "AUD",
 		"fiat_2": "USD"
@@ -118,10 +118,38 @@ var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"][
 
 var exchangeObjOne = new ccxt[context.selected_exchanges.exchange_1]()
 
-console.log("I am binance", exchangeObjOne);
+async function handleData (exchangeObj, symbol, interval, res) {
+	let response;
+	try {
+		return response = await exchangeObj.fetchOHLCV(symbol, interval)
+		// console.log("I am the response", response)
+	} catch (err) {
+		console.log ("error", err)
+
+	}
+
+}
+
+// run the data pull for binance at the rate limit
+
+var dataReturn;
+
+setTimeout(function (){
+	
+	dataReturn = handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1);
+	console.log(dataReturn);
+	// print latest data
+	console.log("timer,",  exchangeObjOne.rateLimit);
+	// console.log(dataReturn[0]); 
+
+}, exchangeObjOne.rateLimit)
+
+// console.log(handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1))
 
 
 
-
-
-
+// // let sleep = (ms) => new Promise (resolve => setTimeout (resolve, ms));
+// if (exchange.has.fetchOHLCV) {
+// 	    // await sleep (exchange.rateLimit) // milliseconds
+//     exchange_data = exchangeObjOne.fetchOHLCV(symbol, '1m') // one minute
+// }
