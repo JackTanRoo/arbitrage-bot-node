@@ -156,6 +156,8 @@ setInterval(function(){
 }, 60000)
 
 
+//  run algorithm
+
 // function timeout(ms) {
 //     return new Promise(resolve => setInterval(resolve, ms));
 // }
