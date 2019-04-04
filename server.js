@@ -149,11 +149,22 @@ async function handleData (exchangeObj, symbol, interval, res) {
 // }, exchangeObjOne.rateLimit)
 
 
-setInterval(function(){
-	console.log("good",
-		handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1, "1m")
-	)	
-}, 60000)
+// setInterval(function(){
+// 	console.log("good",
+// 		handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1, "1m")
+// 	)	
+// }, 60000)
+
+
+var dataObj;
+
+handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1, "1m").then(function(success, err){
+
+	if (err) { console.error(err); }
+	dataObj = success
+	console.log("success ", dataObj[0]);	
+
+});
 
 
 
