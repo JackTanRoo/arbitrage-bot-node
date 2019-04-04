@@ -21,6 +21,8 @@ const WebSocket = require('ws');
 const express = require('express');
 var path = require('path');
 var ccxt = require("ccxt");
+const axios = require('axios');
+
 // console.log("ccxt")
 // init context of params
 
@@ -143,26 +145,6 @@ async function handleData (exchangeObj, symbol, interval, res) {
 
 // run the data pull for binance at the rate limit
 
-// var dataReturn;
-
-// setTimeout(function (){
-	
-// 	dataReturn = handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1);
-// 	console.log(dataReturn);
-// 	// print latest data
-// 	console.log("timer,",  exchangeObjOne.rateLimit);
-// 	// console.log(dataReturn[0]); 
-
-// }, exchangeObjOne.rateLimit)
-
-
-// setInterval(function(){
-// 	console.log("good",
-// 		handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1, "1m")
-// 	)	
-// }, 60000)
-
-
 var binanceData;
 
 setInterval(function(){
@@ -170,13 +152,31 @@ setInterval(function(){
 
 		if (err) { console.error(err); }
 		binanceData = success
-		console.log("success ", binanceData[0]);	
+		console.log("binance data ", binanceData[0]);	
 
 	});
 }, 5000)
 
 
 //  get the data feed for AUD to USD
+
+var currency_conversion_endpoint = "http://www.apilayer.net/api/live?access_key=97ec6af4d54ae75ef9cf190f8706b6c7&currencies=AUD"
+
+var currencyData;
+
+setInterval(function(){
+
+	axios.get(currency_conversion_endpoint)
+	  .then(response => {
+	    currencyData = response.data
+	    console.log(currencyData);
+	    // console.log(response.data.explanation);
+	  })
+	  .catch(error => {
+	    console.log(error);
+	  });
+
+}, 5000)
 
 
 
