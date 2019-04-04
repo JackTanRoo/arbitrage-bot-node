@@ -89,30 +89,39 @@ wss.on('connection', function connection(socket) {
 
 // establish connection with coinjar and pull data
 
-var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"])
+var coinjarData;
+var coinjarDataObj;
+var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
 
-// coinjarWss.on("open", function connection(socket){
-// 	console.log("I am have connected to coinjar")	
+coinjarWss.on("open", function connection(socket){
+	console.log("I am have connected to coinjar")	
 
-// 	// set heartbeat every 40 seconds - coinjar requires every 45 seconds
-// 	setInterval(function(){
-// 		coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
-// 		console.log("sending heart beat!")
-// 	}, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
+	// set heartbeat every 40 seconds - coinjar requires every 45 seconds
+	setInterval(function(){
+		coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
+		console.log("sending heart beat!")
+	}, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
 
-// 	// get message from coinjar Socket
+	// get message from coinjar Socket
 
-// 	coinjarWss.on('message', function incoming(message) {
+	coinjarWss.on('message', function incoming(message) {
 
-// 		// coinjarWss.clients.forEach(client => {
-// 	 //      client.send(message);
-// 		// });  
-// 		console.log("received from a client: ", message)
-// 	});  
+		// coinjarWss.clients.forEach(client => {
+	 //      client.send(message);
+		// });  
+		// console.log("received from a client: ",typeof(message));
+		coinjarDataObj = JSON.parse(message);
+		coinjarData = coinjarDataObj["payload"]
+		console.log("payload", coinjarData)
 
-// 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]);
+	});  
 
-// })
+	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]);
+
+})
+
+// Format of client return
+// {"topic":"ticker:LTCAUD","ref":null,"payload":{"volume":"181.00000000","transition_time":"2019-04-04T07:50:00Z","status":"continuous","session":11800,"prev_close":"117.80000000","last":"122.30000000","current_time":"2019-04-04T05:59:11.670951Z","bid":"116.40000000","ask":"122.10000000"},"event":"update"}
 
 // establish connection with binance
 
@@ -126,10 +135,8 @@ async function handleData (exchangeObj, symbol, interval, res) {
 		response = await exchangeObj.fetchOHLCV(symbol, interval)
 		console.log("I am the response", response[0])
 		return response;
-
 	} catch (err) {
 		console.log ("error", err)
-
 	}
 
 }
@@ -156,39 +163,20 @@ async function handleData (exchangeObj, symbol, interval, res) {
 // }, 60000)
 
 
-var dataObj;
+var binanceData;
 
-handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1, "1m").then(function(success, err){
+setInterval(function(){
+	handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1, "1m").then(function(success, err){
 
-	if (err) { console.error(err); }
-	dataObj = success
-	console.log("success ", dataObj[0]);	
+		if (err) { console.error(err); }
+		binanceData = success
+		console.log("success ", binanceData[0]);	
 
-});
+	});
+}, 5000)
 
 
-
-
-//  run algorithm
-
-// function timeout(ms) {
-//     return new Promise(resolve => setInterval(resolve, ms));
-// }
-// async function sleep() {
-//     await timeout(1000);
-//     console.log("running")
-//     // return handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1, "1m")
-//     // console.log(handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1, "1m"))
-// }
-
-// console.log("I am running", sleep());
-
-// console.log(handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1))
+//  get the data feed for AUD to USD
 
 
 
-// // let sleep = (ms) => new Promise (resolve => setTimeout (resolve, ms));
-// if (exchange.has.fetchOHLCV) {
-// 	    // await sleep (exchange.rateLimit) // milliseconds
-//     exchange_data = exchangeObjOne.fetchOHLCV(symbol, '1m') // one minute
-// }
