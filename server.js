@@ -24,6 +24,8 @@ var path = require('path');
 var ccxt = require("ccxt");
 const axios = require('axios');
 
+
+
 // console.log("ccxt")
 // init context of params
 
@@ -121,12 +123,14 @@ var latestAUDUSDrate;
 var profit1;
 var profit2;
 
+
 // establish connection with coinjar and pull data
 
 var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
 
 coinjarWss.on("open", function connection(socket){
 	console.log("I am have connected to coinjar")	
+	var simpleProfitCounter = 1;
 
 	// set heartbeat every 40 seconds - coinjar requires every 45 seconds
 	setInterval(function(){
@@ -156,8 +160,14 @@ coinjarWss.on("open", function connection(socket){
 
 				profit1 = isProfitableToBuy(context.amountToTrade, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.marginOfError)
 				profit2 = isProfitableToBuy(context.amountToTrade, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.marginOfError)
-				console.log("I am profit if I BOUGHT at ",context.selected_exchanges.exchange_1, profit1)
-				console.log("I am profit if I SOLD at ",context.selected_exchanges.exchange_1, profit2)
+				
+				console.log("first profit", profit1[0], typeof(profit1[0]), simpleProfitCounter)
+
+				simpleProfitCounter = simpleProfitCounter + profit1[0];
+
+				console.log("I am profit if I BOUGHT at ",context.selected_exchanges.exchange_1, profit1);
+				console.log("profit counter: ", simpleProfitCounter, "Total ROI" , (simpleProfitCounter / 5000 - 1)*100)
+				// console.log("I am profit if I SOLD at ",context.selected_exchanges.exchange_1, profit2)
 		}
 
 	});  
@@ -268,6 +278,8 @@ function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, excha
     // return false;
 	// return true;
 }
+
+// simple profit counter
 
 
 
