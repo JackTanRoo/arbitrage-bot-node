@@ -39,11 +39,17 @@ context = {
 			"data_endpoint": "wss://feed.exchange.coinjar.com/socket/websocket",
 			"heartbeat_freq": 4500,
 			"heartbeat_message": '{ "topic": "phoenix", "event": "heartbeat", "payload": {}, "ref": 0 }',
-			"channel_sub": '{ "topic": "ticker:LTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }'
+			"channel_sub": '{ "topic": "ticker:LTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }',
+			"slippage": 0.01,
+			"fees": 0.001
+		},
+		"binance" :{
+			"slippage": 0.005,
+			"fees": 0.001
 		}
 	},
 	"forex_parameters":{
-		"forex_api": "http://www.apilayer.net/api/live?access_key=97ec6af4d54ae75ef9cf190f8706b6c7&currencies="
+		"forex_api": "http://www.apilayer.net/api/live?access_key=97ec6af4d54ae75ef9cf190f8706b6c7&currencies=AUD"
 	},
 	"selected_trading_pairs": {
 		"crypto_1": "LTC/USDT",
@@ -91,14 +97,19 @@ wss.on('connection', function connection(socket) {
 	wss.send('Hello world!');
 });
 
-
-// establish connection with coinjar and pull data
+// global pricing variables
 
 var coinjarData;
 var coinjarDataObj;
 
 var latestCoinjarPriceAUD;
 var latestCoinjarPriceUSD;
+
+var latestBinancePriceUSD;
+
+var latestAUDUSDrate;
+
+// establish connection with coinjar and pull data
 
 var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
 
@@ -125,7 +136,7 @@ coinjarWss.on("open", function connection(socket){
 
 		if (coinjarData["status"] == "continuous") {
 			latestCoinjarPriceAUD = coinjarData["last"];
-			latestCoinjarPriceUSD = latestCoinjarPriceAUD * currencyData
+			latestCoinjarPriceUSD = latestCoinjarPriceAUD / latestAUDUSDrate;
 			console.log("payload", coinjarData, "AUD", latestCoinjarPriceAUD, "USD", latestCoinjarPriceUSD)
 		}
 
@@ -165,15 +176,20 @@ setInterval(function(){
 
 		if (err) { console.error(err); }
 		binanceData = success
-		console.log("binance data ", binanceData[0]);	
+		latestBinancePriceUSD = binanceData[0][4]
+		console.log("binance data ", binanceData[0], latestBinancePriceUSD);	
 
 	});
 }, 5000)
 
 
+// format of binance return output
+
+// [ 1554412320000, 83, 83.1, 82.98, 82.99, 294.06736 ]
+
 //  get the data feed for AUD to USD
 
-var currency_conversion_endpoint = "http://www.apilayer.net/api/live?access_key=97ec6af4d54ae75ef9cf190f8706b6c7&currencies=AUD"
+var currency_conversion_endpoint = context["forex_parameters"]["forex_api"];
 
 
 setInterval(function(){
@@ -182,8 +198,8 @@ setInterval(function(){
 	  .then(response => {
 	  	console.log("Forex Data type", typeof(response.data))
 	    currencyObj = response.data;
-	    currencyData = currencyObj["quotes"]["USDAUD"]
-	    console.log(currencyData);
+	    latestAUDUSDrate = currencyObj["quotes"]["USDAUD"]
+	    console.log(latestAUDUSDrate);
 	    // console.log(response.data.explanation);
 	  })
 	  .catch(error => {
@@ -192,12 +208,21 @@ setInterval(function(){
 
 }, 5000)
 
+
+// format of currency conversion return output
+
 // { success: true,
 //   terms: 'https://currencylayer.com/terms',
 //   privacy: 'https://currencylayer.com/privacy',
 //   timestamp: 1554438785,
 //   source: 'USD',
 //   quotes: { USDAUD: 1.40336 } }
+
+
+// implement trading algorithm
+
+
+
 
 
 
