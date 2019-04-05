@@ -12,6 +12,7 @@
 // # make trades to selected trades based on key trade parameters - balance, trading amount, trading currency, trading direction, trading price
 // # track balance after every trade
 // # calculate profitability of every trade
+// # implement dynamic amount to trade depending on margin of error
 
 
 // // # select crypto to track to track pricing data and make trades
@@ -42,12 +43,16 @@ context = {
 			"heartbeat_message": '{ "topic": "phoenix", "event": "heartbeat", "payload": {}, "ref": 0 }',
 			"channel_sub": '{ "topic": "ticker:LTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }',
 			"slippage": 0.01,
-			"fees": 0.001
+			"fees": 0.001,
+			"balanceFiat": 5000,
+			"balanceCrypto": 100
 		},
 		"binance" :{
 			"name": "binance",
 			"slippage": 0.005,
-			"fees": 0.001
+			"fees": 0.001,
+			"balanceFiat": 5000,
+			"balanceCrypto": 100
 		}
 	},
 	"forex_parameters":{
@@ -60,9 +65,7 @@ context = {
 		"fiat_2": "USD"
 	},
 	"marginOfError": 0.01,
-	"balanceCrypto": 100,
-	"balanceAUD": 5000,
-	"balanceUSD": 5000
+	"amountToTrade": 0.05
 }
 
 //init Express
@@ -115,6 +118,8 @@ var latestBinancePriceUSD;
 
 var latestAUDUSDrate;
 
+var profit;
+
 // establish connection with coinjar and pull data
 
 var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
@@ -143,7 +148,13 @@ coinjarWss.on("open", function connection(socket){
 		if (coinjarData["status"] == "continuous") {
 			latestCoinjarPriceAUD = coinjarData["last"];
 			latestCoinjarPriceUSD = latestCoinjarPriceAUD / latestAUDUSDrate;
-			console.log("payload", coinjarData, "AUD", latestCoinjarPriceAUD, "USD", latestCoinjarPriceUSD)
+			// console.log("payload", coinjarData, "AUD", latestCoinjarPriceAUD, "USD", latestCoinjarPriceUSD)
+
+			// make trade when there is a coinjar trade
+			// function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, exchange_2, price_exchange_two, margin_of_error){
+
+				profit = isProfitableToBuy(context.amountToTrade, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.marginOfError)
+				console.log("I am profit if I traded, ", profit)
 		}
 
 	});  
@@ -227,17 +238,32 @@ setInterval(function(){
 
 // implement trading algorithm
 
-function isProfitableTrade (volumeToTrade, exchange_one, price_exchange_one, exchange_two, price_exchange_two, margin_of_error){
+function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, exchange_2, price_exchange_two, margin_of_error){
 	
 	var estimated_buy_unit_price = price_exchange_one * (1 + context["crypto_exchange_parameters"][exchange_1]['slippage']);
 
-	var estimated_buy_total_price = estimated_buy_unit_price * (1 + context["crypto_exchange_parameters"][exchange_1]['fees']);
-    
-    var estimated_sell_price = (price_exchange_two * (1 - context["crypto_exchange_parameters"][exchange_2]['slippage']) * (1 + exchange_params[exchange_two]['fees']))
-    
-    var estimated_final_price_diff =  estimated_buy_price -  estimated_sell_price
+	
+	var estimated_buy_total_price = volumeToTrade * context["crypto_exchange_parameters"][exchange_1]["balanceFiat"]
 
-	return true;
+	// units to buy refers to units of crypto to buy = (amount to trade - fees) / final price of crypto
+
+	var units_to_buy = (estimated_buy_total_price * (1 - context["crypto_exchange_parameters"][exchange_1]['fees'])) / (estimated_buy_unit_price );
+    
+    var estimated_sell_unit_price = price_exchange_two * (1 - context["crypto_exchange_parameters"][exchange_2]['slippage']);
+
+	var estimated_sell_total_price =  units_to_buy * estimated_sell_unit_price * (1 - context["crypto_exchange_parameters"][exchange_2]['fees']);
+    
+    var estimated_final_profit = estimated_sell_total_price - estimated_buy_total_price;
+
+    var ROI = (estimated_final_profit / estimated_buy_total_price)*100;
+
+    return [estimated_final_profit, estimated_buy_total_price, ROI + "%", margin_of_error * 100 + "%"]
+
+    // if (ROI > margin_of_error){
+    // 	return true;
+    // }
+    // return false;
+	// return true;
 }
 
 
