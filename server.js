@@ -26,6 +26,9 @@ const axios = require('axios');
 // console.log("ccxt")
 // init context of params
 
+var currencyData;
+var currencyObj;
+
 context = {
 	"selected_exchanges": {
 		"exchange_1": "binance",
@@ -93,6 +96,10 @@ wss.on('connection', function connection(socket) {
 
 var coinjarData;
 var coinjarDataObj;
+
+var latestCoinjarPriceAUD;
+var latestCoinjarPriceUSD;
+
 var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
 
 coinjarWss.on("open", function connection(socket){
@@ -114,7 +121,13 @@ coinjarWss.on("open", function connection(socket){
 		// console.log("received from a client: ",typeof(message));
 		coinjarDataObj = JSON.parse(message);
 		coinjarData = coinjarDataObj["payload"]
-		console.log("payload", coinjarData)
+		// skip heart beat response
+
+		if (coinjarData["status"] == "continuous") {
+			latestCoinjarPriceAUD = coinjarData["last"];
+			latestCoinjarPriceUSD = latestCoinjarPriceAUD * currencyData
+			console.log("payload", coinjarData, "AUD", latestCoinjarPriceAUD, "USD", latestCoinjarPriceUSD)
+		}
 
 	});  
 
@@ -162,13 +175,14 @@ setInterval(function(){
 
 var currency_conversion_endpoint = "http://www.apilayer.net/api/live?access_key=97ec6af4d54ae75ef9cf190f8706b6c7&currencies=AUD"
 
-var currencyData;
 
 setInterval(function(){
 
 	axios.get(currency_conversion_endpoint)
 	  .then(response => {
-	    currencyData = response.data
+	  	console.log("Forex Data type", typeof(response.data))
+	    currencyObj = response.data;
+	    currencyData = currencyObj["quotes"]["USDAUD"]
 	    console.log(currencyData);
 	    // console.log(response.data.explanation);
 	  })
@@ -177,6 +191,13 @@ setInterval(function(){
 	  });
 
 }, 5000)
+
+// { success: true,
+//   terms: 'https://currencylayer.com/terms',
+//   privacy: 'https://currencylayer.com/privacy',
+//   timestamp: 1554438785,
+//   source: 'USD',
+//   quotes: { USDAUD: 1.40336 } }
 
 
 
