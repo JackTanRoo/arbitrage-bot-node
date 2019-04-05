@@ -36,6 +36,7 @@ context = {
 	},
 	"crypto_exchange_parameters": {
 		"coinjar": {
+			"name": "coinjar",
 			"data_endpoint": "wss://feed.exchange.coinjar.com/socket/websocket",
 			"heartbeat_freq": 4500,
 			"heartbeat_message": '{ "topic": "phoenix", "event": "heartbeat", "payload": {}, "ref": 0 }',
@@ -44,6 +45,7 @@ context = {
 			"fees": 0.001
 		},
 		"binance" :{
+			"name": "binance",
 			"slippage": 0.005,
 			"fees": 0.001
 		}
@@ -56,7 +58,11 @@ context = {
 		"crypto_2": "LTC/AUD",
 		"fiat_1": "AUD",
 		"fiat_2": "USD"
-	}
+	},
+	"marginOfError": 0.01,
+	"balanceCrypto": 100,
+	"balanceAUD": 5000,
+	"balanceUSD": 5000
 }
 
 //init Express
@@ -221,7 +227,18 @@ setInterval(function(){
 
 // implement trading algorithm
 
+function isProfitableTrade (volumeToTrade, exchange_one, price_exchange_one, exchange_two, price_exchange_two, margin_of_error){
+	
+	var estimated_buy_unit_price = price_exchange_one * (1 + context["crypto_exchange_parameters"][exchange_1]['slippage']);
 
+	var estimated_buy_total_price = estimated_buy_unit_price * (1 + context["crypto_exchange_parameters"][exchange_1]['fees']);
+    
+    var estimated_sell_price = (price_exchange_two * (1 - context["crypto_exchange_parameters"][exchange_2]['slippage']) * (1 + exchange_params[exchange_two]['fees']))
+    
+    var estimated_final_price_diff =  estimated_buy_price -  estimated_sell_price
+
+	return true;
+}
 
 
 
