@@ -136,7 +136,7 @@ coinjarWss.on("open", function connection(socket){
 	// set heartbeat every 40 seconds - coinjar requires every 45 seconds
 	setInterval(function(){
 		coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
-		console.log("sending heart beat!")
+		// console.log("sending heart beat!")
 	}, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
 
 	// get message from coinjar Socket
@@ -163,13 +163,13 @@ coinjarWss.on("open", function connection(socket){
 				profit2 = isProfitableToBuy(context.amountToTrade, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.marginOfError)
 				
 				// if profit ROI% is above margin of error %
-				console.log("buy at binance ", profit1[2], "buy at coinjar", profit2[2])
+				console.log("buy at binance ", profit1["ROI"], "buy at coinjar", profit2["ROI"])
 
-				if (profit1[2] >= profit1[3]) {
-					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_1, " at price ", latestBinancePriceUSD, " with total invested amount of", profit1[1], " with expected profit of ", profit1[0]);
+				if (profit1["ROI"] >= profit1["margin_of_error"]) {
+					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_1, " at price ", latestBinancePriceUSD, " with total invested amount of", profit1["total_fiat_used_to_buy"], " with expected profit of ", profit1["final_profit"]);
 				}
-				else if (profit2[2] >= profit2[3] ) {
-					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_2, " at price ", latestCoinjarPriceUSD, " with total invested amount of", profit2[1], " with expected profit of ", profit2[0]);
+				else if (profit2["ROI"] >= profit2["margin_of_error"] ) {
+					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_2, " at price ", latestCoinjarPriceUSD, " with total invested amount of", profit2["total_fiat_used_to_buy"], " with expected profit of ", profit2["final_profit"]);
 
 				}
 
@@ -284,7 +284,13 @@ function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, excha
 
     var ROI = (estimated_final_profit / estimated_buy_total_price)*100;
 
-    return [estimated_final_profit, estimated_buy_total_price, ROI, margin_of_error*100]
+    return {
+    	"final_profit" :  estimated_final_profit,
+    	"total_fiat_used_to_buy": estimated_buy_total_price,
+    	"total_units_bought": units_to_buy,
+    	"ROI" : ROI,
+    	"margin_of_error": margin_of_error * 1000
+    }
 
     // if (ROI > margin_of_error){
     // 	return true;
