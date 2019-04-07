@@ -297,4 +297,11 @@ function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, excha
 
 
 
+// graph candles and trading signals
+
+
+
+// 
+
+
 
