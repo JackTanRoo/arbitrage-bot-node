@@ -122,6 +122,8 @@ var latestAUDUSDrate;
 
 var profit1;
 var profit2;
+var simpleProfitCounter = 1000;
+
 
 
 // establish connection with coinjar and pull data
@@ -130,7 +132,6 @@ var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"][
 
 coinjarWss.on("open", function connection(socket){
 	console.log("I am have connected to coinjar")	
-	var simpleProfitCounter = 1;
 
 	// set heartbeat every 40 seconds - coinjar requires every 45 seconds
 	setInterval(function(){
@@ -150,20 +151,20 @@ coinjarWss.on("open", function connection(socket){
 		coinjarData = coinjarDataObj["payload"]
 		// skip heart beat response
 
-		if (coinjarData["status"] == "continuous") {
+		if (coinjarData["status"] == "continuous" && latestBinancePriceUSD != undefined && latestAUDUSDrate != undefined) {
 			latestCoinjarPriceAUD = coinjarData["last"];
 			latestCoinjarPriceUSD = latestCoinjarPriceAUD / latestAUDUSDrate;
-			// console.log("payload", coinjarData, "AUD", latestCoinjarPriceAUD, "USD", latestCoinjarPriceUSD)
+			console.log("payload", coinjarData, "AUD", latestCoinjarPriceAUD, "USD", latestCoinjarPriceUSD)
 
 			// make trade when there is a coinjar trade
 			// function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, exchange_2, price_exchange_two, margin_of_error){
-
+				console.log("inputs", context.amountToTrade, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.marginOfError)
 				profit1 = isProfitableToBuy(context.amountToTrade, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.marginOfError)
 				profit2 = isProfitableToBuy(context.amountToTrade, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.marginOfError)
 				
-				console.log("first profit", profit1[0], typeof(profit1[0]), simpleProfitCounter)
+				console.log("first profit", profit1[0], profit1, typeof(profit1[0]), simpleProfitCounter)
 
-				simpleProfitCounter = simpleProfitCounter + profit1[0];
+				simpleProfitCounter += profit1[0];
 
 				console.log("I am profit if I BOUGHT at ",context.selected_exchanges.exchange_1, profit1);
 				console.log("profit counter: ", simpleProfitCounter, "Total ROI" , (simpleProfitCounter / 5000 - 1)*100)
