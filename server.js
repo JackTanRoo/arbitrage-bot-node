@@ -299,7 +299,36 @@ function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, excha
 
 }
 
-// simple profit counter
+// updates current portfolio balance 
+
+function returnBalance (params) {
+
+	// params format {
+		// current
+	// }
+
+
+	var output = {}
+
+
+
+
+
+	// return 
+	// format {
+		// exchange_1_fiat_balance : xxx,
+		// exchange_1_crypto_balance : xxx,
+
+		// exchange_2_fiat_balance : xxx,
+		// exchange_2_crypto_balance : xxx,
+	
+	// }
+}
+
+
+
+// balance crypto and fiat between coinjar and binance when it is more than 30% difference
+
 
 
 
