@@ -158,16 +158,27 @@ coinjarWss.on("open", function connection(socket){
 
 			// make trade when there is a coinjar trade
 			// function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, exchange_2, price_exchange_two, margin_of_error){
-				console.log("inputs", context.amountToTrade, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.marginOfError)
+				// console.log("inputs", context.amountToTrade, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.marginOfError)
 				profit1 = isProfitableToBuy(context.amountToTrade, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.marginOfError)
 				profit2 = isProfitableToBuy(context.amountToTrade, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.marginOfError)
 				
-				console.log("first profit", profit1[0], profit1, typeof(profit1[0]), simpleProfitCounter)
+				// if profit ROI% is above margin of error %
+				console.log("buy at binance ", profit1[2], "buy at coinjar", profit2[2])
 
-				simpleProfitCounter += profit1[0];
+				if (profit1[2] >= profit1[3]) {
+					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_1, " at price ", latestBinancePriceUSD, " with total invested amount of", profit1[1], " with expected profit of ", profit1[0]);
+				}
+				else if (profit2[2] >= profit2[3] ) {
+					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_2, " at price ", latestCoinjarPriceUSD, " with total invested amount of", profit2[1], " with expected profit of ", profit2[0]);
 
-				console.log("I am profit if I BOUGHT at ",context.selected_exchanges.exchange_1, profit1);
-				console.log("profit counter: ", simpleProfitCounter, "Total ROI" , (simpleProfitCounter / 5000 - 1)*100)
+				}
+
+				// console.log("first profit", profit1[0], profit1, typeof(profit1[0]), simpleProfitCounter)
+
+				// simpleProfitCounter += profit1[0];
+
+				// console.log("I am profit if I BOUGHT at ",context.selected_exchanges.exchange_1, profit1);
+				// console.log("profit counter: ", simpleProfitCounter, "Total ROI" , (simpleProfitCounter / 5000 - 1)*100)
 				// console.log("I am profit if I SOLD at ",context.selected_exchanges.exchange_1, profit2)
 		}
 
@@ -252,6 +263,8 @@ setInterval(function(){
 
 // implement trading algorithm
 
+// logic: exchange_1 is the venue to buy, exchange _2 is the venue to sell
+
 function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, exchange_2, price_exchange_two, margin_of_error){
 	
 	var estimated_buy_unit_price = price_exchange_one * (1 + context["crypto_exchange_parameters"][exchange_1]['slippage']);
@@ -271,13 +284,13 @@ function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, excha
 
     var ROI = (estimated_final_profit / estimated_buy_total_price)*100;
 
-    return [estimated_final_profit, estimated_buy_total_price, ROI + "%", margin_of_error * 100 + "%"]
+    return [estimated_final_profit, estimated_buy_total_price, ROI, margin_of_error*100]
 
     // if (ROI > margin_of_error){
     // 	return true;
     // }
     // return false;
-	// return true;
+
 }
 
 // simple profit counter
