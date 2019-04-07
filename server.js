@@ -166,10 +166,10 @@ coinjarWss.on("open", function connection(socket){
 				console.log("buy at binance ", profit1["ROI"], "buy at coinjar", profit2["ROI"])
 
 				if (profit1["ROI"] >= profit1["margin_of_error"]) {
-					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_1, " at price ", latestBinancePriceUSD, " with total invested amount of", profit1["total_fiat_used_to_buy"], " with expected profit of ", profit1["final_profit"]);
+					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_1, " at price ", latestBinancePriceUSD, " with total invested amount of", profit1.exchange_1[exchange_1]["total_fiat_used_to_buy"], " with expected profit of ", profit1["final_profit"]);
 				}
 				else if (profit2["ROI"] >= profit2["margin_of_error"] ) {
-					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_2, " at price ", latestCoinjarPriceUSD, " with total invested amount of", profit2["total_fiat_used_to_buy"], " with expected profit of ", profit2["final_profit"]);
+					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_2, " at price ", latestCoinjarPriceUSD, " with total invested amount of", profit2.exchange_2[exchange_2]["total_fiat_used_to_buy"], " with expected profit of ", profit2["final_profit"]);
 
 				}
 
@@ -282,47 +282,120 @@ function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, excha
     
     var estimated_final_profit = estimated_sell_total_price - estimated_buy_total_price;
 
-    var ROI = (estimated_final_profit / estimated_buy_total_price)*100;
+    var ROI = (estimated_final_profit / estimated_buy_total_price) * 100;
 
-    return {
+
+
+    // output format
+    // {
+    	// final_profit : "xxx",
+    	// ROI: "ROI",
+    	// margin_of_error: margin_of_error,
+    	// [exchange_1]: {
+    	// 	total_fiat_used: xxx
+    	// 	total_crypto_used: xxx
+    	// 	name: xxx
+    	// }, 
+
+	   	// [exchange_2]: {
+    	// 	total_fiat_used: xxx
+    	// 	total_crypto_used: xxx
+    	// 	name: xxx
+    	// }, 
+    // }
+
+
+    var output = {
     	"final_profit" :  estimated_final_profit,
-    	"total_fiat_used_to_buy": estimated_buy_total_price,
-    	"total_units_bought": units_to_buy,
     	"ROI" : ROI,
     	"margin_of_error": margin_of_error * 1000
-    }
+    };
+
+
+	output[exchange_1] = {};
+    output[exchange_2] = {};
+
+    output[exchange_1]["total_fiat_used"] = -1 * estimated_buy_total_price;
+    output[exchange_1]["total_crypto_used"] = units_to_buy;
+
+    output[exchange_2]["total_fiat_use"] = estimated_sell_total_price;
+    output[exchange_2]["total_crypto_used"] = -1 * units_to_buy;
+
+    console.log( "estimated_buy_total_price",estimated_buy_total_price, output)
+    
+    return output;
 
     // if (ROI > margin_of_error){
     // 	return true;
     // }
-    // return false;
-
-}
+    // // return false;
+    // 	"total_fiat_used_to_buy": estimated_buy_total_price,
+    // 	"total_units_bought": units_to_buy,
+};
 
 // updates current portfolio balance 
 
 function returnBalance (params) {
 
+
+	// logic input current balance for fiat and crypto for both exchanges
+	// input traded amounts 
+	// calculate final balances
+	// return balance
+	// show me 
 	// params format {
-		// current
+		// names: [binance, coinjar]
+	// 	[exchange_1] : {
+		// current_fiat: xxx
+		// current_crypto : xxx
+		// fiat_traded: xxx
+		// crypto_traded: xxx
+	// },
+	//  [exchange_2] : {
+		// current_fiat : xxx
+		// curent_crypto : xxx
+		// fiat_traded: xxx
+		// crypto_traded: xxx
+	// }
 	// }
 
 
-	var output = {}
+	var output = params;
 
+	var names = params.names;
 
+	var exchange_1 = names[0];
+	var exchange_2 = names[1];
 
+	output[exchange_1].current_fiat = params[exchange_1].current_fiat + params[exchange_1].fiat_traded
+	output[exchange_2].current_fiat = params[exchange_2].current_fiat + params[exchange_2].fiat_traded
 
+	output[exchange_1].current_crypto = params[exchange_1].current_crypto + params[exchange_1].crypto_traded
+	output[exchange_2].current_crypto = params[exchange_2].current_crypto + params[exchange_2].crypto_traded
 
-	// return 
-	// format {
-		// exchange_1_fiat_balance : xxx,
-		// exchange_1_crypto_balance : xxx,
+	// remove the fiat traded and crypto traded key value pairs
 
-		// exchange_2_fiat_balance : xxx,
-		// exchange_2_crypto_balance : xxx,
-	
+	delete output[exchange_1].fiat_traded;
+	delete output[exchange_2].fiat_traded;
+ 
+	delete output[exchange_1].crypto_traded;
+	delete output[exchange_2].crypto_traded;
+
+	return output;
+
+	// output format {
+	// 	exchange_1 : {
+		// name: xxx
+		// current_fiat: xxx
+		// current_crypto : xxx
+	// },
+	//  exchange_2 : {
+		// name : xxx
+		// current_fiat : xxx
+		// curent_crypto : xxx
 	// }
+	// }
+
 }
 
 
