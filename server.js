@@ -46,15 +46,15 @@ context = {
 			"channel_sub": '{ "topic": "ticker:LTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }',
 			"slippage": 0.01,
 			"fees": 0.001,
-			"balanceFiat": 5000,
-			"balanceCrypto": 100
+			"current_fiat": 5000,
+			"current_crypto": 100
 		},
 		"binance" :{
 			"name": "binance",
 			"slippage": 0.005,
 			"fees": 0.001,
-			"balanceFiat": 5000,
-			"balanceCrypto": 100
+			"current_fiat": 5000,
+			"current_crypto": 100
 		}
 	},
 	"forex_parameters":{
@@ -166,11 +166,48 @@ coinjarWss.on("open", function connection(socket){
 				console.log("buy at binance ", profit1["ROI"], "buy at coinjar", profit2["ROI"])
 
 				if (profit1["ROI"] >= profit1["margin_of_error"]) {
-					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_1, " at price ", latestBinancePriceUSD, " with total invested amount of", profit1.exchange_1[exchange_1]["total_fiat_used_to_buy"], " with expected profit of ", profit1["final_profit"]);
+					// update the balance 
+
+					context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].
+
+
+
+					// var input = {
+					// 	names: [context.selected_exchanges.exchange_1, context.selected_exchanges.exchange_2]
+					// };
+
+					// input[context.selected_exchanges.exchange_1] = {
+					// 	current_fiat: context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_fiat;
+					// 	current_crypto: context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_crypto;
+					// };
+
+					// input[context.selected_exchanges.exchange_2] = {
+					// 	current_fiat: context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_fiat;
+					// 	current_crypto: context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_crypto;
+					// };
+
+					var newBalance = returnBalance (input);
+
+	// Input format {
+	// names: [binance, coinjar]
+	// 	[exchange_1] : {
+		// current_fiat: xxx
+		// current_crypto : xxx
+		// total_fiat_used: xxx
+		// total_crypto_used: xxx
+	// },
+	//  [exchange_2] : {
+		// current_fiat : xxx
+		// curent_crypto : xxx
+		// total_fiat_used: xxx
+		// total_crypto_used: xxx
+	// }
+	// }
+
+					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_1, " at price ", latestBinancePriceUSD, " with total invested amount of", profit1[exchange_1]["total_fiat_used"], " with expected profit of ", profit1["final_profit"]);
 				}
 				else if (profit2["ROI"] >= profit2["margin_of_error"] ) {
-					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_2, " at price ", latestCoinjarPriceUSD, " with total invested amount of", profit2.exchange_2[exchange_2]["total_fiat_used_to_buy"], " with expected profit of ", profit2["final_profit"]);
-
+					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_2, " at price ", latestCoinjarPriceUSD, " with total invested amount of", profit2[exchange_2]["total_fiat_used"], " with expected profit of ", profit2["final_profit"]);
 				}
 
 				// console.log("first profit", profit1[0], profit1, typeof(profit1[0]), simpleProfitCounter)
@@ -308,7 +345,7 @@ function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, excha
     var output = {
     	"final_profit" :  estimated_final_profit,
     	"ROI" : ROI,
-    	"margin_of_error": margin_of_error * 1000
+    	"margin_of_error": margin_of_error * 100
     };
 
 
@@ -322,15 +359,8 @@ function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, excha
     output[exchange_2]["total_crypto_used"] = -1 * units_to_buy;
 
     console.log( "estimated_buy_total_price",estimated_buy_total_price, output)
-    
-    return output;
 
-    // if (ROI > margin_of_error){
-    // 	return true;
-    // }
-    // // return false;
-    // 	"total_fiat_used_to_buy": estimated_buy_total_price,
-    // 	"total_units_bought": units_to_buy,
+    return output;
 };
 
 // updates current portfolio balance 
@@ -348,14 +378,14 @@ function returnBalance (params) {
 	// 	[exchange_1] : {
 		// current_fiat: xxx
 		// current_crypto : xxx
-		// fiat_traded: xxx
-		// crypto_traded: xxx
+		// total_fiat_used: xxx
+		// total_crypto_used: xxx
 	// },
 	//  [exchange_2] : {
 		// current_fiat : xxx
 		// curent_crypto : xxx
-		// fiat_traded: xxx
-		// crypto_traded: xxx
+		// total_fiat_used: xxx
+		// total_crypto_used: xxx
 	// }
 	// }
 
@@ -367,11 +397,11 @@ function returnBalance (params) {
 	var exchange_1 = names[0];
 	var exchange_2 = names[1];
 
-	output[exchange_1].current_fiat = params[exchange_1].current_fiat + params[exchange_1].fiat_traded
-	output[exchange_2].current_fiat = params[exchange_2].current_fiat + params[exchange_2].fiat_traded
+	output[exchange_1].current_fiat = params[exchange_1].current_fiat + params[exchange_1].total_fiat_used;
+	output[exchange_2].current_fiat = params[exchange_2].current_fiat + params[exchange_2].total_fiat_used;
 
-	output[exchange_1].current_crypto = params[exchange_1].current_crypto + params[exchange_1].crypto_traded
-	output[exchange_2].current_crypto = params[exchange_2].current_crypto + params[exchange_2].crypto_traded
+	output[exchange_1].current_crypto = params[exchange_1].current_crypto + params[exchange_1].total_crypto_used;
+	output[exchange_2].current_crypto = params[exchange_2].current_crypto + params[exchange_2].total_crypto_used;
 
 	// remove the fiat traded and crypto traded key value pairs
 
@@ -396,7 +426,7 @@ function returnBalance (params) {
 	// }
 	// }
 
-}
+};
 
 
 
