@@ -118,7 +118,7 @@ var latestCoinjarPriceUSD;
 
 var latestBinancePriceUSD;
 
-var latestAUDUSDrate;
+var latestAUDUSDrate = 1.4;
 
 var profit1;
 var profit2;
@@ -168,55 +168,26 @@ coinjarWss.on("open", function connection(socket){
 				if (profit1["ROI"] >= profit1["margin_of_error"]) {
 					// update the balance 
 
-					context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].
+					context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_fiat += profit1[context.selected_exchanges.exchange_1].total_fiat_used;
+					context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_crypto += profit1[context.selected_exchanges.exchange_1].total_crypto_used;
 
+					context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_fiat += profit1[context.selected_exchanges.exchange_2].total_fiat_used;
+					context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_crypto += profit1[context.selected_exchanges.exchange_2].total_crypto_used;
 
-
-					// var input = {
-					// 	names: [context.selected_exchanges.exchange_1, context.selected_exchanges.exchange_2]
-					// };
-
-					// input[context.selected_exchanges.exchange_1] = {
-					// 	current_fiat: context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_fiat;
-					// 	current_crypto: context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_crypto;
-					// };
-
-					// input[context.selected_exchanges.exchange_2] = {
-					// 	current_fiat: context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_fiat;
-					// 	current_crypto: context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_crypto;
-					// };
-
-					var newBalance = returnBalance (input);
-
-	// Input format {
-	// names: [binance, coinjar]
-	// 	[exchange_1] : {
-		// current_fiat: xxx
-		// current_crypto : xxx
-		// total_fiat_used: xxx
-		// total_crypto_used: xxx
-	// },
-	//  [exchange_2] : {
-		// current_fiat : xxx
-		// curent_crypto : xxx
-		// total_fiat_used: xxx
-		// total_crypto_used: xxx
-	// }
-	// }
-
-					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_1, " at price ", latestBinancePriceUSD, " with total invested amount of", profit1[exchange_1]["total_fiat_used"], " with expected profit of ", profit1["final_profit"]);
+					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_1, " at price ", latestBinancePriceUSD, " with total invested amount of", profit1[context.selected_exchanges.exchange_1]["total_fiat_used"], " with expected profit of ", profit1["final_profit"]);
 				}
+
 				else if (profit2["ROI"] >= profit2["margin_of_error"] ) {
-					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_2, " at price ", latestCoinjarPriceUSD, " with total invested amount of", profit2[exchange_2]["total_fiat_used"], " with expected profit of ", profit2["final_profit"]);
+
+					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_2, " at price ", latestCoinjarPriceUSD, " with total invested amount of", profit2[context.selected_exchanges.exchange_2]["total_fiat_used"], " with expected profit of ", profit2["final_profit"]);
+
+					context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_fiat += profit2[context.selected_exchanges.exchange_1].total_fiat_used;
+					context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_crypto += profit2[context.selected_exchanges.exchange_1].total_crypto_used;
+
+					context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_fiat += profit2[context.selected_exchanges.exchange_2].total_fiat_used;
+					context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_crypto += profit2[context.selected_exchanges.exchange_2].total_crypto_used;
+
 				}
-
-				// console.log("first profit", profit1[0], profit1, typeof(profit1[0]), simpleProfitCounter)
-
-				// simpleProfitCounter += profit1[0];
-
-				// console.log("I am profit if I BOUGHT at ",context.selected_exchanges.exchange_1, profit1);
-				// console.log("profit counter: ", simpleProfitCounter, "Total ROI" , (simpleProfitCounter / 5000 - 1)*100)
-				// console.log("I am profit if I SOLD at ",context.selected_exchanges.exchange_1, profit2)
 		}
 
 	});  
@@ -256,7 +227,7 @@ setInterval(function(){
 		if (err) { console.error(err); }
 		binanceData = success
 		latestBinancePriceUSD = binanceData[0][4]
-		console.log("binance data ", binanceData[0], latestBinancePriceUSD);	
+		// console.log("binance data ", binanceData[0], latestBinancePriceUSD);	
 
 	});
 }, 1000)
@@ -275,9 +246,13 @@ setInterval(function(){
 
 	axios.get(currency_conversion_endpoint)
 	  .then(response => {
-	  	console.log("Forex Data type", typeof(response.data))
+	  	console.log("Forex Data type", response.data)
 	    currencyObj = response.data;
-	    latestAUDUSDrate = currencyObj["quotes"]["USDAUD"]
+	    if (currencyObj["quotes"]["USDAUD"] != undefined ) {
+
+		    latestAUDUSDrate = currencyObj["quotes"]["USDAUD"]
+
+	    }
 	    console.log(latestAUDUSDrate);
 	    // console.log(response.data.explanation);
 	  })
@@ -304,10 +279,13 @@ setInterval(function(){
 
 function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, exchange_2, price_exchange_two, margin_of_error){
 	
+	console.log ("inputs to isprofitable", volumeToTrade, exchange_1, price_exchange_one, exchange_2, price_exchange_two, margin_of_error)
+
 	var estimated_buy_unit_price = price_exchange_one * (1 + context["crypto_exchange_parameters"][exchange_1]['slippage']);
 
-	
-	var estimated_buy_total_price = volumeToTrade * context["crypto_exchange_parameters"][exchange_1]["balanceFiat"]
+	var estimated_buy_total_price = volumeToTrade * context["crypto_exchange_parameters"][exchange_1]["current_fiat"]
+
+	console.log("after estimated_buy_total_price", context["crypto_exchange_parameters"][exchange_1])
 
 	// units to buy refers to units of crypto to buy = (amount to trade - fees) / final price of crypto
 
@@ -341,6 +319,7 @@ function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, excha
     	// }, 
     // }
 
+    console.log("check is profit: ", estimated_buy_unit_price, estimated_buy_total_price, units_to_buy, estimated_sell_unit_price, estimated_final_profit)
 
     var output = {
     	"final_profit" :  estimated_final_profit,
@@ -355,7 +334,7 @@ function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, excha
     output[exchange_1]["total_fiat_used"] = -1 * estimated_buy_total_price;
     output[exchange_1]["total_crypto_used"] = units_to_buy;
 
-    output[exchange_2]["total_fiat_use"] = estimated_sell_total_price;
+    output[exchange_2]["total_fiat_used"] = estimated_sell_total_price;
     output[exchange_2]["total_crypto_used"] = -1 * units_to_buy;
 
     console.log( "estimated_buy_total_price",estimated_buy_total_price, output)
