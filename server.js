@@ -93,9 +93,12 @@ const wss = new WebSocket.Server({ server });
 
 // const server = new WebSocket.Server({ server: app.listen(3000) });
  
+
+// SET UP SOCKET CONNECTION ON SERVER TO SERVE CLIENT TRADING DATA FOR GRAPH
+
 wss.on('connection', function connection(socket) {
 	
-	// console.log("I have connected", socket)
+	console.log("I have connected", socket)
 	
 	socket.on('message', function incoming(message) {
 
@@ -105,7 +108,7 @@ wss.on('connection', function connection(socket) {
 		console.log("received from a client: ", message)
 	});  
 
-	wss.send('Hello world!');
+	socket.send('Hello from server!');
 });
 
 // global pricing variables
@@ -131,7 +134,7 @@ var simpleProfitCounter = 1000;
 var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
 
 coinjarWss.on("open", function connection(socket){
-	console.log("I am have connected to coinjar")	
+	// console.log("I am have connected to coinjar")	
 
 	// set heartbeat every 40 seconds - coinjar requires every 45 seconds
 	setInterval(function(){
@@ -154,7 +157,7 @@ coinjarWss.on("open", function connection(socket){
 		if (coinjarData["status"] == "continuous" && latestBinancePriceUSD != undefined && latestAUDUSDrate != undefined) {
 			latestCoinjarPriceAUD = coinjarData["last"];
 			latestCoinjarPriceUSD = latestCoinjarPriceAUD / latestAUDUSDrate;
-			console.log("payload", coinjarData, "AUD", latestCoinjarPriceAUD, "USD", latestCoinjarPriceUSD)
+			// console.log("payload", coinjarData, "AUD", latestCoinjarPriceAUD, "USD", latestCoinjarPriceUSD)
 
 			// make trade when there is a coinjar trade
 			// function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, exchange_2, price_exchange_two, margin_of_error){
@@ -163,7 +166,7 @@ coinjarWss.on("open", function connection(socket){
 				profit2 = isProfitableToBuy(context.amountToTrade, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.marginOfError)
 				
 				// if profit ROI% is above margin of error %
-				console.log("buy at binance ", profit1["ROI"], "buy at coinjar", profit2["ROI"])
+				// console.log("buy at binance ", profit1["ROI"], "buy at coinjar", profit2["ROI"])
 
 				if (profit1["ROI"] >= profit1["margin_of_error"]) {
 					// update the balance 
@@ -174,12 +177,12 @@ coinjarWss.on("open", function connection(socket){
 					context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_fiat += profit1[context.selected_exchanges.exchange_2].total_fiat_used;
 					context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_crypto += profit1[context.selected_exchanges.exchange_2].total_crypto_used;
 
-					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_1, " at price ", latestBinancePriceUSD, " with total invested amount of", profit1[context.selected_exchanges.exchange_1]["total_fiat_used"], " with expected profit of ", profit1["final_profit"]);
+					// console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_1, " at price ", latestBinancePriceUSD, " with total invested amount of", profit1[context.selected_exchanges.exchange_1]["total_fiat_used"], " with expected profit of ", profit1["final_profit"]);
 				}
 
 				else if (profit2["ROI"] >= profit2["margin_of_error"] ) {
 
-					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_2, " at price ", latestCoinjarPriceUSD, " with total invested amount of", profit2[context.selected_exchanges.exchange_2]["total_fiat_used"], " with expected profit of ", profit2["final_profit"], context.crypto_exchange_parameters);
+					// console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_2, " at price ", latestCoinjarPriceUSD, " with total invested amount of", profit2[context.selected_exchanges.exchange_2]["total_fiat_used"], " with expected profit of ", profit2["final_profit"], context.crypto_exchange_parameters);
 
 					context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_fiat += profit2[context.selected_exchanges.exchange_1].total_fiat_used;
 					context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_crypto += profit2[context.selected_exchanges.exchange_1].total_crypto_used;
@@ -209,7 +212,7 @@ async function handleData (exchangeObj, symbol, interval, res) {
 	// let response;
 	try {
 		response = await exchangeObj.fetchOHLCV(symbol, interval)
-		console.log("I am the response", response[0])
+		// console.log("I am the response", response[0])
 		return response;
 	} catch (err) {
 		console.log ("error", err)
@@ -246,7 +249,7 @@ setInterval(function(){
 
 	axios.get(currency_conversion_endpoint)
 	  .then(response => {
-	  	console.log("Forex Data type", response.data)
+	  	// console.log("Forex Data type", response.data)
 	    currencyObj = response.data;
 	    if (currencyObj["quotes"]["USDAUD"] != undefined ) {
 
@@ -279,13 +282,13 @@ setInterval(function(){
 
 function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, exchange_2, price_exchange_two, margin_of_error){
 	
-	console.log ("inputs to isprofitable", volumeToTrade, exchange_1, price_exchange_one, exchange_2, price_exchange_two, margin_of_error)
+	// console.log ("inputs to isprofitable", volumeToTrade, exchange_1, price_exchange_one, exchange_2, price_exchange_two, margin_of_error)
 
 	var estimated_buy_unit_price = price_exchange_one * (1 + context["crypto_exchange_parameters"][exchange_1]['slippage']);
 
 	var estimated_buy_total_price = volumeToTrade * context["crypto_exchange_parameters"][exchange_1]["current_fiat"]
 
-	console.log("after estimated_buy_total_price", context["crypto_exchange_parameters"][exchange_1])
+	// console.log("after estimated_buy_total_price", context["crypto_exchange_parameters"][exchange_1])
 
 	// units to buy refers to units of crypto to buy = (amount to trade - fees) / final price of crypto
 
@@ -319,7 +322,7 @@ function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, excha
     	// }, 
     // }
 
-    console.log("check is profit: ", estimated_buy_unit_price, estimated_buy_total_price, units_to_buy, estimated_sell_unit_price, estimated_final_profit)
+    // console.log("check is profit: ", estimated_buy_unit_price, estimated_buy_total_price, units_to_buy, estimated_sell_unit_price, estimated_final_profit)
 
     var output = {
     	"final_profit" :  estimated_final_profit,
@@ -337,7 +340,7 @@ function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, excha
     output[exchange_2]["total_fiat_used"] = estimated_sell_total_price;
     output[exchange_2]["total_crypto_used"] = -1 * units_to_buy;
 
-    console.log( "estimated_buy_total_price",estimated_buy_total_price, output)
+    // console.log( "estimated_buy_total_price",estimated_buy_total_price, output)
 
     return output;
 };
