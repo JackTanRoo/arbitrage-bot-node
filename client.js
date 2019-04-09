@@ -26,14 +26,14 @@ $( document ).ready(function() {
 	  if (incomingData.type = "trade") {
 	  	
 	  	Plotly.extendTraces("chart", { 
-	  		x: [[moment.unix(Math.floor(incomingData.data.x)).format('h:mm:ss A, MMMM Do, YYYY')]],
+	  		x: [[moment.unix(Math.floor(incomingData.data.x)).format('H:m:s, MMM D, YY')]],
 	  		y: [[incomingData.data.y]]
 	  	}, [0])
 
 	  	count++;
 
 	  	if (count > 10) {
-	  		Ploty.relayout("chart", {
+	  		Plotly.relayout("chart", {
 	  			xaxis : {
 	  				range: [count-10, count]
 	  			}
@@ -60,7 +60,7 @@ $( document ).ready(function() {
 
 
     Plotly.plot ("chart", [{
-    	x: [moment.unix(Math.floor(Date.now() / 1000)).format('h:mm:ss A, MMMM Do, YYYY')],
+    	x: [moment.unix(Math.floor(Date.now() / 1000)).format('H:m:s, MMM D, YY')],
     	y: [0],
     	type : "line"
     }]);

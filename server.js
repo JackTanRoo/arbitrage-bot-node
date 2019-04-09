@@ -260,7 +260,7 @@ setInterval(function(){
 		if (err) { console.error(err); }
 		binanceData = success
 		latestBinancePriceUSD = binanceData[0][4]
-		// console.log("binance data ", binanceData[0], latestBinancePriceUSD);	
+		console.log("binance data ", binanceData[0], latestBinancePriceUSD);	
 
 	});
 }, 1000)
