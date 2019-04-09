@@ -166,6 +166,7 @@ wss.on('connection', function connection(clientsocket) {
 				console.log("coinjardate", coinjarDate)
 				var coinjarDataJSON = {
 					name : "coinjar",
+					data : "trade",
 					data : {
 						x : coinjarDate,
 						y : coinjarData.last
