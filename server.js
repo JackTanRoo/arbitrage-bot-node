@@ -23,7 +23,7 @@ const express = require('express');
 var path = require('path');
 var ccxt = require("ccxt");
 const axios = require('axios');
-
+var moment = require("moment");
 
 
 // console.log("ccxt")
@@ -96,20 +96,20 @@ const wss = new WebSocket.Server({ server });
 
 // SET UP SOCKET CONNECTION ON SERVER TO SERVE CLIENT TRADING DATA FOR GRAPH
 
-wss.on('connection', function connection(socket) {
+// wss.on('connection', function connection(socket) {
 	
-	console.log("I have connected", socket)
+// 	console.log("I have connected", socket)
 	
-	socket.on('message', function incoming(message) {
+// 	socket.on('message', function incoming(message) {
 
-		wss.clients.forEach(client => {
-	      client.send(message);
-		});  
-		console.log("received from a client: ", message)
-	});  
+// 		wss.clients.forEach(client => {
+// 	      client.send(message);
+// 		});  
+// 		console.log("received from a client: ", message)
+// 	});  
 
-	socket.send('Hello from server!');
-});
+// 	socket.send('Hello from server!');
+// });
 
 // global pricing variables
 
@@ -131,76 +131,105 @@ var simpleProfitCounter = 1000;
 
 // establish connection with coinjar and pull data
 
-var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
 
-coinjarWss.on("open", function connection(socket){
-	// console.log("I am have connected to coinjar")	
+wss.on('connection', function connection(clientsocket) {
+	console.log("I am connected", clientsocket);
+	
 
-	// set heartbeat every 40 seconds - coinjar requires every 45 seconds
-	setInterval(function(){
-		coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
-		// console.log("sending heart beat!")
-	}, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
+	var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
 
-	// get message from coinjar Socket
+	coinjarWss.on("open", function connection(socket){
+		console.log("I am have connected to coinjar")	
 
-	coinjarWss.on('message', function incoming(message) {
+		// set heartbeat every 40 seconds - coinjar requires every 45 seconds
+		setInterval(function(){
+			coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
+			// console.log("sending heart beat!")
+		}, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
 
-		// coinjarWss.clients.forEach(client => {
-	 //      client.send(message);
-		// });  
-		// console.log("received from a client: ",typeof(message));
-		coinjarDataObj = JSON.parse(message);
-		coinjarData = coinjarDataObj["payload"]
-		// skip heart beat response
+		// get message from coinjar Socket
 
-		if (coinjarData["status"] == "continuous" && latestBinancePriceUSD != undefined && latestAUDUSDrate != undefined) {
-			latestCoinjarPriceAUD = coinjarData["last"];
-			latestCoinjarPriceUSD = latestCoinjarPriceAUD / latestAUDUSDrate;
-			// console.log("payload", coinjarData, "AUD", latestCoinjarPriceAUD, "USD", latestCoinjarPriceUSD)
+		coinjarWss.on('message', function incoming(message) {
 
-			// make trade when there is a coinjar trade
-			// function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, exchange_2, price_exchange_two, margin_of_error){
-				// console.log("inputs", context.amountToTrade, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.marginOfError)
-				profit1 = isProfitableToBuy(context.amountToTrade, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.marginOfError)
-				profit2 = isProfitableToBuy(context.amountToTrade, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.marginOfError)
-				
-				// if profit ROI% is above margin of error %
-				// console.log("buy at binance ", profit1["ROI"], "buy at coinjar", profit2["ROI"])
+			// coinjarWss.clients.forEach(client => {
+		 //      client.send(message);
+			// });  
+			// console.log("received from a client: ",typeof(message));
+			
+			coinjarDataObj = JSON.parse(message);
+			coinjarData = coinjarDataObj["payload"]
+			
+			// send data to graphing client
 
-				if (profit1["ROI"] >= profit1["margin_of_error"]) {
-					// update the balance 
+			if (coinjarData["status"] == "continuous") {
+				var coinjarDate = moment(coinjarData.current_time).unix();
+				console.log("coinjardate", coinjarDate)
+				var coinjarDataJSON = {
+					name : "coinjar",
+					data : {
+						x : coinjarDate,
+						y : coinjarData.last
+					}
+				};
 
-					context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_fiat += profit1[context.selected_exchanges.exchange_1].total_fiat_used;
-					context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_crypto += profit1[context.selected_exchanges.exchange_1].total_crypto_used;
+				clientsocket.send(JSON.stringify(coinjarDataJSON))
+			}
 
-					context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_fiat += profit1[context.selected_exchanges.exchange_2].total_fiat_used;
-					context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_crypto += profit1[context.selected_exchanges.exchange_2].total_crypto_used;
+			// Format of client return
+			// {"topic":"ticker:LTCAUD","ref":null,"payload":{"volume":"181.00000000","transition_time":"2019-04-04T07:50:00Z","status":"continuous","session":11800,"prev_close":"117.80000000","last":"122.30000000","current_time":"2019-04-04T05:59:11.670951Z","bid":"116.40000000","ask":"122.10000000"},"event":"update"}
 
-					// console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_1, " at price ", latestBinancePriceUSD, " with total invested amount of", profit1[context.selected_exchanges.exchange_1]["total_fiat_used"], " with expected profit of ", profit1["final_profit"]);
-				}
 
-				else if (profit2["ROI"] >= profit2["margin_of_error"] ) {
+			// skip heart beat response
 
-					// console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_2, " at price ", latestCoinjarPriceUSD, " with total invested amount of", profit2[context.selected_exchanges.exchange_2]["total_fiat_used"], " with expected profit of ", profit2["final_profit"], context.crypto_exchange_parameters);
+			if (coinjarData["status"] == "continuous" && latestBinancePriceUSD != undefined && latestAUDUSDrate != undefined) {
+				latestCoinjarPriceAUD = coinjarData["last"];
+				latestCoinjarPriceUSD = latestCoinjarPriceAUD / latestAUDUSDrate;
+				console.log("payload", coinjarData, "AUD", latestCoinjarPriceAUD, "USD", latestCoinjarPriceUSD)
 
-					context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_fiat += profit2[context.selected_exchanges.exchange_1].total_fiat_used;
-					context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_crypto += profit2[context.selected_exchanges.exchange_1].total_crypto_used;
+				// make trade when there is a coinjar trade
+				// function isProfitableToBuy (volumeToTrade, exchange_1, price_exchange_one, exchange_2, price_exchange_two, margin_of_error){
+					// console.log("inputs", context.amountToTrade, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.marginOfError)
+					profit1 = isProfitableToBuy(context.amountToTrade, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.marginOfError)
+					profit2 = isProfitableToBuy(context.amountToTrade, context.selected_exchanges.exchange_2, latestCoinjarPriceUSD, context.selected_exchanges.exchange_1, latestBinancePriceUSD, context.marginOfError)
+					
+					// if profit ROI% is above margin of error %
+					// console.log("buy at binance ", profit1["ROI"], "buy at coinjar", profit2["ROI"])
 
-					context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_fiat += profit2[context.selected_exchanges.exchange_2].total_fiat_used;
-					context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_crypto += profit2[context.selected_exchanges.exchange_2].total_crypto_used;
+					if (profit1["ROI"] >= profit1["margin_of_error"]) {
+						// update the balance 
 
-				}
-		}
+						context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_fiat += profit1[context.selected_exchanges.exchange_1].total_fiat_used;
+						context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_crypto += profit1[context.selected_exchanges.exchange_1].total_crypto_used;
 
-	});  
+						context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_fiat += profit1[context.selected_exchanges.exchange_2].total_fiat_used;
+						context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_crypto += profit1[context.selected_exchanges.exchange_2].total_crypto_used;
 
-	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]);
+						// console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_1, " at price ", latestBinancePriceUSD, " with total invested amount of", profit1[context.selected_exchanges.exchange_1]["total_fiat_used"], " with expected profit of ", profit1["final_profit"]);
+					}
 
-})
+					else if (profit2["ROI"] >= profit2["margin_of_error"] ) {
 
-// Format of client return
-// {"topic":"ticker:LTCAUD","ref":null,"payload":{"volume":"181.00000000","transition_time":"2019-04-04T07:50:00Z","status":"continuous","session":11800,"prev_close":"117.80000000","last":"122.30000000","current_time":"2019-04-04T05:59:11.670951Z","bid":"116.40000000","ask":"122.10000000"},"event":"update"}
+						// console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_2, " at price ", latestCoinjarPriceUSD, " with total invested amount of", profit2[context.selected_exchanges.exchange_2]["total_fiat_used"], " with expected profit of ", profit2["final_profit"], context.crypto_exchange_parameters);
+
+						context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_fiat += profit2[context.selected_exchanges.exchange_1].total_fiat_used;
+						context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_crypto += profit2[context.selected_exchanges.exchange_1].total_crypto_used;
+
+						context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_fiat += profit2[context.selected_exchanges.exchange_2].total_fiat_used;
+						context.crypto_exchange_parameters[context.selected_exchanges.exchange_2].current_crypto += profit2[context.selected_exchanges.exchange_2].total_crypto_used;
+
+					}
+			}
+
+		});  
+
+		coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]);
+
+	});
+
+});
+
+
+
 
 // establish connection with binance
 

@@ -19,7 +19,27 @@ $( document ).ready(function() {
 	  // by the server is stored in the `data` property
 	  const data = JSON.parse(event.data);
 	  console.log("received data from server", data);
+	  
 	});
+
+
+	// data structure from 
+
+	// plotly
+	// [trace0=binance, trace1=coinjar, trace2=USDAUD, trace3=tradingmarker];
+	// incoming data format
+	// {
+		// name: tracename,
+		// data: {
+		// x : [timeinunixtime]
+		// y : [closepriceinUSD]
+		// type: "line"
+		// }
+	// }
+
+
+
+
 
     Plotly.plot ("chart", [{
     	x: [1,2,3,4],
