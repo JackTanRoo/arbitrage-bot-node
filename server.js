@@ -179,7 +179,7 @@ coinjarWss.on("open", function connection(socket){
 
 				else if (profit2["ROI"] >= profit2["margin_of_error"] ) {
 
-					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_2, " at price ", latestCoinjarPriceUSD, " with total invested amount of", profit2[context.selected_exchanges.exchange_2]["total_fiat_used"], " with expected profit of ", profit2["final_profit"]);
+					console.log("Is profitable to BUY AT ", context.selected_exchanges.exchange_2, " at price ", latestCoinjarPriceUSD, " with total invested amount of", profit2[context.selected_exchanges.exchange_2]["total_fiat_used"], " with expected profit of ", profit2["final_profit"], context.crypto_exchange_parameters);
 
 					context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_fiat += profit2[context.selected_exchanges.exchange_1].total_fiat_used;
 					context.crypto_exchange_parameters[context.selected_exchanges.exchange_1].current_crypto += profit2[context.selected_exchanges.exchange_1].total_crypto_used;
@@ -406,6 +406,20 @@ function returnBalance (params) {
 	// }
 
 };
+
+
+// total ROI calculator
+
+// function totalROI calculator (contextCryptoParams) {
+
+// // input current fiat and crypto balance in both exchanges
+
+// // input original balance
+
+// // calculator ROI in both exchanges
+
+
+// }
 
 
 
