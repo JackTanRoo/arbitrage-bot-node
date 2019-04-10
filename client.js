@@ -70,6 +70,7 @@ $( document ).ready(function() {
 
 	  }
 	  
+	  
 	});
 
 	// data structure from 
