@@ -24,11 +24,11 @@ $( document ).ready(function() {
 	  var incomingData = JSON.parse(event.data);
 	  // console.log("received data from server", data);
 	  if (incomingData.type = "trade") {
-	  	
+	  	var currentTime = moment.unix(Math.floor(incomingData.data.x)).format('H:m:s, MMM D, YY');
 	  	Plotly.extendTraces("chart", { 
-	  		x: [[moment.unix(Math.floor(incomingData.data.x)).format('H:m:s, MMM D, YY')]],
-	  		y: [[incomingData.data.y]]
-	  	}, [0])
+	  		x: [[currentTime],[currentTime]],
+	  		y: [[incomingData.data.y],[Math.random()*100]]
+	  	}, [0,1])
 
 	  	count++;
 
@@ -59,8 +59,13 @@ $( document ).ready(function() {
 	// };
 
 
-    Plotly.plot ("chart", [{
+    Plotly.plot ("chart", [
+    {
     	x: [moment.unix(Math.floor(Date.now() / 1000)).format('H:m:s, MMM D, YY')],
+    	y: [0],
+    	type : "line"
+    },{
+		x: [moment.unix(Math.floor(Date.now() / 1000)).format('H:m:s, MMM D, YY')],
     	y: [0],
     	type : "line"
     }]);
