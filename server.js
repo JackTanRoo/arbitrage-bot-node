@@ -120,6 +120,7 @@ var latestCoinjarPriceAUD;
 var latestCoinjarPriceUSD;
 
 var latestBinancePriceUSD;
+var latestBinanceDate;
 
 var latestAUDUSDrate = 1.4;
 
@@ -144,7 +145,7 @@ wss.on('connection', function connection(clientsocket) {
 		// set heartbeat every 40 seconds - coinjar requires every 45 seconds
 		setInterval(function(){
 			coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
-			// console.log("sending heart beat!")
+			console.log("sending heart beat!")
 		}, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
 
 		// get message from coinjar Socket
@@ -163,17 +164,32 @@ wss.on('connection', function connection(clientsocket) {
 
 			if (coinjarData["status"] == "continuous") {
 				var coinjarDate = moment(coinjarData.current_time).unix();
+				
 				console.log("coinjardate", coinjarDate)
-				var coinjarDataJSON = {
-					name : "coinjar",
-					data : "trade",
-					data : {
-						x : coinjarDate,
-						y : coinjarData.last
+				
+				var dataJSON = 
+
+				{
+					type : "trade",
+					coinjar : {
+						name : "coinjar",
+						type : "trade",
+						data : {
+							x : coinjarDate,
+							y : coinjarData.last /latestAUDUSDrate
+						}	
+					},
+					binance: {
+						name : "binance",
+						type : "trade",
+						data: {
+							x : latestBinanceDate,
+							y : latestBinancePriceUSD
+						}
 					}
 				};
-
-				clientsocket.send(JSON.stringify(coinjarDataJSON))
+				console.log("am about to send data to client, ", dataJSON)
+				clientsocket.send(JSON.stringify(dataJSON))
 			}
 
 			// Format of client return
@@ -259,7 +275,8 @@ setInterval(function(){
 
 		if (err) { console.error(err); }
 		binanceData = success
-		latestBinancePriceUSD = binanceData[0][4]
+		latestBinancePriceUSD = binanceData[0][4];
+		latestBinanceDate = binanceData[0][0] / 1000;
 		console.log("binance data ", binanceData[0], latestBinancePriceUSD);	
 
 	});

@@ -22,12 +22,40 @@ $( document ).ready(function() {
 	  // The `event` object is a typical DOM event object, and the message data sent
 	  // by the server is stored in the `data` property
 	  var incomingData = JSON.parse(event.data);
+	  console.log("I got data from server: ", incomingData)
 	  // console.log("received data from server", data);
 	  if (incomingData.type = "trade") {
-	  	var currentTime = moment.unix(Math.floor(incomingData.data.x)).format('H:m:s, MMM D, YY');
+	  	
+			// Incoming Data format
+				// trace 1 = coinjar
+				// {
+				// 	type : "trade",
+				// 	coinjar : {
+				// 		name : "coinjar",
+				// 		type : "trade",
+				// 		data : {
+				// 			x : coinjarDate,
+				// 			y : coinjarData.last
+				// 		}	
+				// 	},
+				// 	binance: {
+				// 		name : "binance",
+				// 		type : "trade",
+				// 		data: {
+				// 			x : latestBinanceDate,
+				// 			y : latestBinancePriceUSD
+				// 		}
+				// 	}
+				// };
+				// index 0 = binance, 
+				// index 1 = coinjar
+
+	  	var binanceCurrentTime = moment.unix(Math.floor(incomingData.binance.data.x)).format('H:m:s, MMM D, YY');
+	  	var coinjarCurrentTime = moment.unix(Math.floor(incomingData.coinjar.data.x)).format('H:m:s, MMM D, YY');
+	  	
 	  	Plotly.extendTraces("chart", { 
-	  		x: [[currentTime],[currentTime]],
-	  		y: [[incomingData.data.y],[Math.random()*100]]
+	  		x: [[binanceCurrentTime],[coinjarCurrentTime]],
+	  		y: [[incomingData.binance.data.y],[incomingData.coinjar.data.y]]
 	  	}, [0,1])
 
 	  	count++;
@@ -63,11 +91,13 @@ $( document ).ready(function() {
     {
     	x: [moment.unix(Math.floor(Date.now() / 1000)).format('H:m:s, MMM D, YY')],
     	y: [0],
-    	type : "line"
+    	type : "line",
+    	name : "binance"
     },{
 		x: [moment.unix(Math.floor(Date.now() / 1000)).format('H:m:s, MMM D, YY')],
     	y: [0],
-    	type : "line"
+    	type : "line",
+    	name : "coinjar"
     }]);
 
 });
