@@ -129,6 +129,35 @@ var profit2;
 var simpleProfitCounter = 1000;
 
 
+// establish connection with binance
+
+var response;
+
+var exchangeObjOne = new ccxt[context.selected_exchanges.exchange_1]()
+
+async function handleData (exchangeObj, symbol, interval, res) {
+	// let response;
+	try {
+		response = await exchangeObj.fetchOHLCV(symbol, interval)
+		// console.log("I am the response", response[0])
+		return response;
+	} catch (err) {
+		console.log ("error", err)
+	}
+
+}
+
+// run the data pull for binance at the rate limit
+
+var binanceData;
+
+var newBinanceDate;
+
+var dataJSON = {};
+
+
+
+
 
 // establish connection with coinjar and pull data
 
@@ -167,7 +196,7 @@ wss.on('connection', function connection(clientsocket) {
 				
 				console.log("coinjardate", coinjarDate)
 				
-				var dataJSON = 
+				dataJSON = 
 
 				{
 					type : "trade",
@@ -189,7 +218,36 @@ wss.on('connection', function connection(clientsocket) {
 					}
 				};
 				console.log("am about to send data to client, ", dataJSON)
-				clientsocket.send(JSON.stringify(dataJSON))
+								
+				setInterval(function(){
+					handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1, "1m").then(function(success, err){
+
+						if (err) { console.error(err); }
+						binanceData = success
+						console.log("binance data ", binanceData[0]);	
+
+						newBinanceDate = binanceData[0][0] / 1000;
+
+						console.log("new binance date", newBinanceDate, latestBinanceDate)
+						
+						if (newBinanceDate > latestBinanceDate || latestBinanceDate == undefined ) {				
+							latestBinanceDate = newBinanceDate;
+							latestBinancePriceUSD = binanceData[0][4];
+
+							dataJSON.binance.data.x = latestBinanceDate;
+							dataJSON.binance.data.y = latestBinancePriceUSD;
+
+							clientsocket.send(JSON.stringify(dataJSON))
+							console.log("I sent the data");
+
+						};
+
+						console.log("latest binance data ", latestBinanceDate, latestBinancePriceUSD);	
+
+					});
+				}, 1000)
+
+
 			}
 
 			// Format of client return
@@ -248,39 +306,6 @@ wss.on('connection', function connection(clientsocket) {
 
 
 
-// establish connection with binance
-
-var response;
-
-var exchangeObjOne = new ccxt[context.selected_exchanges.exchange_1]()
-
-async function handleData (exchangeObj, symbol, interval, res) {
-	// let response;
-	try {
-		response = await exchangeObj.fetchOHLCV(symbol, interval)
-		// console.log("I am the response", response[0])
-		return response;
-	} catch (err) {
-		console.log ("error", err)
-	}
-
-}
-
-// run the data pull for binance at the rate limit
-
-var binanceData;
-
-setInterval(function(){
-	handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1, "1m").then(function(success, err){
-
-		if (err) { console.error(err); }
-		binanceData = success
-		latestBinancePriceUSD = binanceData[0][4];
-		latestBinanceDate = binanceData[0][0] / 1000;
-		console.log("binance data ", binanceData[0], latestBinancePriceUSD);	
-
-	});
-}, 1000)
 
 
 // format of binance return output
