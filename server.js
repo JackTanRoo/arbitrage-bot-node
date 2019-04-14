@@ -54,7 +54,8 @@ context = {
 			"slippage": 0.005,
 			"fees": 0.001,
 			"current_fiat": 5000,
-			"current_crypto": 100
+			"current_crypto": 100,
+			"time_sync_adjustment" : (8 * 60 * 60 + 19 * 60 + 55)
 		}
 	},
 	"forex_parameters":{
@@ -226,7 +227,7 @@ wss.on('connection', function connection(clientsocket) {
 						binanceData = success
 						console.log("binance data ", binanceData[0]);	
 
-						newBinanceDate = binanceData[0][0] / 1000;
+						newBinanceDate = binanceData[0][0] / 1000 + context.crypto_exchange_parameters.binance.time_sync_adjustment;
 
 						console.log("new binance date", newBinanceDate, latestBinanceDate)
 						
@@ -245,7 +246,7 @@ wss.on('connection', function connection(clientsocket) {
 						console.log("latest binance data ", latestBinanceDate, latestBinancePriceUSD);	
 
 					});
-				}, 1000)
+				}, 5000)
 
 
 			}
