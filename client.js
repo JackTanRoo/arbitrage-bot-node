@@ -99,6 +99,8 @@ $( document ).ready(function() {
     	y: [0],
     	type : "line",
     	name : "coinjar"
-    }]);
+    }], {}, {
+    	responsive : true
+    });
 
 });
