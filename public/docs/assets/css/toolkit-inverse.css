@@ -9111,6 +9111,7 @@ textarea {
     border-bottom: 0;
     border-top: 4px solid; }
 
+.statcard-passive,
 .statcard-primary,
 .statcard-success,
 .statcard-info,
