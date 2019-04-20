@@ -183,7 +183,7 @@ wss.on('connection', function connection(clientsocket) {
 		coinjarWss.on('message', function incoming(message) {
 
 			// coinjarWss.clients.forEach(client => {
-		 //      client.send(message);
+			//      client.send(message);
 			// });  
 			// console.log("received from a client: ",typeof(message));
 			
