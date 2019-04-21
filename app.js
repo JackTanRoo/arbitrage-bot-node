@@ -15,13 +15,14 @@ var context = {
 		"coinjar": {
 			"name": "coinjar",
 			"data_endpoint": "wss://feed.exchange.coinjar.com/socket/websocket",
-			"heartbeat_freq": 4500,
+			"heartbeat_freq": 40000,
 			"heartbeat_message": '{ "topic": "phoenix", "event": "heartbeat", "payload": {}, "ref": 0 }',
 			"channel_sub": {
 				"BTCUSD": '{ "topic": "trades:BTCUSD", "event": "phx_join", "payload": {}, "ref": 0 }',
 				"ZECUSD": '{ "topic": "trades:ZECUSD", "event": "phx_join", "payload": {}, "ref": 0 }',
 				"BTCAUD": '{ "topic": "trades:BTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }',
-				"LTCAUD": '{ "topic": "trades:LTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }'
+				"LTCAUD": '{ "topic": "trades:LTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }',
+				"ZECAUD": '{ "topic": "trades:ZECAUD", "event": "phx_join", "payload": {}, "ref": 0 }'
 			}, 
 			"slippage": 0.01,
 			"fees": 0.001,
@@ -34,7 +35,7 @@ var context = {
 			"slippage": 0.005,
 			"fees": 0.001,
 			"current_fiat": 5000,
-			"current_crypto": 100,
+			"currentLTCAUD_crypto": 100,
 			"time_sync_adjustment" : (8 * 60 * 60 + 19 * 60 + 55)
 		}
 	},
@@ -50,8 +51,13 @@ var context = {
 	"marginOfError": 0.01,
 	"amountToTrade": 0.05,
 	"trading_data": {
-		"binance": [],
-		"coinjar":[]
+		"binance": {
+			"BTCAUD" : [],
+			"LTCAUD" : [],
+			"ZECAUD" : [] 
+		},
+		"coinjar":[],
+		"AUDUSD":[]
 	}
 }
 
@@ -149,10 +155,12 @@ coinjarWss.on("open", function connection(socket){
 
 
 	// subscribe to coinjar token channel
-	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSD"]);
-	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECUSD"]);
+	// coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSD"]);
+	// coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECUSD"]);
 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCAUD"]);
 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]);
+	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECAUD"]);
+
 
 	// get message from coinjar Socket
 
@@ -161,9 +169,9 @@ coinjarWss.on("open", function connection(socket){
 		coinjarDataObj = JSON.parse(message);
 		coinjarData = coinjarDataObj["payload"]
 		
-		// if (coinjarData["status"] == "continuous") {
+		if (coinjarDataObj["topic"] !== "phoenix") {
 			console.log("received data from coinjar", coinjarDataObj)
-		// }
+		}
 
 
 		// send data to graphing client
@@ -199,7 +207,6 @@ coinjarWss.on("open", function connection(socket){
 		// }
 
 	});
-
 });
 
 //  get data feed from binance
