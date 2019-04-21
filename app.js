@@ -22,12 +22,12 @@ var context = {
 		"coinjar": {
 			"name": "coinjar",
 			"data_endpoint": "wss://feed.exchange.coinjar.com/socket/websocket",
-			"heartbeat_freq": 40000,
+			"heartbeat_freq": 10000,
 			"heartbeat_message": '{ "topic": "phoenix", "event": "heartbeat", "payload": {}, "ref": 0 }',
 			"channel_sub": {
 				"BTCAUD": '{ "topic": "trades:BTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }',
 				"LTCAUD": '{ "topic": "trades:LTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }',
-				"ZECAUD": '{ "topic": "trades:ZECBTC", "event": "phx_join", "payload": {}, "ref": 0 }'
+				"ZECBTC": '{ "topic": "trades:ZECBTC", "event": "phx_join", "payload": {}, "ref": 0 }'
 			}, 
 			"slippage": 0.01,
 			"fees": 0.001,
@@ -39,9 +39,9 @@ var context = {
 			"data_endpoint": "wss://stream.binance.com:9443",
 			"heartbeat_freq": 3 * 60 * 1000,
 			"channel_sub": {
-				"BTCUSD": "BTCUSDT",
+				"BTCUSDT": "BTCUSDT",
 				"ZECBTC": "ZECBTC",
-				"LTCUSD": "LTCUSDT"
+				"LTCUSDT": "LTCUSDT"
 			},
 			"slippage": 0.005,
 			"fees": 0.001,
@@ -63,14 +63,14 @@ var context = {
 	"amountToTrade": 0.05,
 	"trading_data": {
 		"binance": {
-			"BTCUSD" : [],
+			"BTCUSDT" : [],
 			"ZECBTC" : [],
-			"LTCUSD" : [] 
+			"LTCUSDT" : [] 
 		},
 		"coinjar": {
-			"BTCUSD" : [],
-			"ZECBTC" : [],
-			"LTCUSD" : [] 
+			"BTCAUD" : [],
+			"LTCAUD" : [],
+			"ZECBTC" : [] 
 		},
 		"forex":{
 			"AUDUSD" : []
@@ -179,7 +179,7 @@ coinjarWss.on("open", function connection(socket){
 	// coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECUSD"]);
 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCAUD"]);
 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]);
-	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCUSDT"]);
+	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECBTC"]);
 
 
 	// get message from coinjar Socket
@@ -187,12 +187,10 @@ coinjarWss.on("open", function connection(socket){
 	coinjarWss.on('message', function incoming(message) {
 		
 		coinjarDataObj = JSON.parse(message);
-		coinjarData = coinjarDataObj["payload"]
+		coinjarData = coinjarDataObj["payload"];
 		
 		if (coinjarDataObj["topic"] !== "phoenix") {
-			// console.log("received data from coinjar", coinjarDataObj.payload.trades)
-
-
+			console.log("received data from coinjar", coinjarDataObj)
 		}
 
 
@@ -265,20 +263,24 @@ coinjarWss.on("open", function connection(socket){
 
 
 binance.websockets.trades([
-	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["BTCUSD"],
+	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["BTCUSDT"],
 	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["ZECBTC"],
-	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["LTCUSD"]
+	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["LTCUSDT"]
 
 	], (trades) => {
 
-  let {e:eventType, E:eventTime, s:symbol, p:price, q:quantity, m:maker, a:tradeId} = trades;
+		let {e:eventType, E:eventTime, s:symbol, p:price, q:quantity, m:maker, a:tradeId} = trades;
+		// console.log("trades", trades, typeof(trades))
 
-  console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", maker: "+maker);
+		context.trading_data = updateTradingLog(context.trading_data, "binance", trades.s, trades)
+		console.log(context.trading_data)
+
+	  // console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", maker: "+maker);
 
 
 });
 
-// get data for forex
+// GET DATA FROM FOREXT
 
 var currency_conversion_endpoint = context["forex_parameters"]["forex_api"];
 
@@ -306,7 +308,14 @@ setInterval(function(){
 
 // UPDATE THE CONTEXT VARIABLE
 
+function updateTradingLog (contextTradingObj, exchange, symbol, input){
+	var output = contextTradingObj;
 
+	var cleanInput = handleTradeData(exchange, input, symbol)
+	console.log("output", output)
+	output[exchange][symbol].push (cleanInput);
+	return output;
+}
 
 
 // PARSE AND CLEAN 1 INSTANCE OF TRADING DATA
@@ -315,10 +324,10 @@ function handleTradeData (exchange, input, symbol){
 
 
 	var output = {
-		symbol: ,
-		time: ,
-		price: ,
-		quantity: 
+		symbol: "",
+		time: "",
+		price: "",
+		quantity: "" 
 	};
 
 	if (exchange == "binance") {
@@ -339,7 +348,7 @@ function handleTradeData (exchange, input, symbol){
 		output.symbol = Object.keys(input.quotes)[0];
 		output.time = input.timestamp * 1000;;
 		output.price = input.quotes.USDAUD;
-		output.quantity = 
+		output.quantity;
 	};
 
 
@@ -357,13 +366,19 @@ function handleTradeData (exchange, input, symbol){
 
 
 // COINJAR
-// { value: '522.69',
-// timestamp: '2019-04-21T05:43:12.673168Z',
-// tid: 465063,
-// taker_side: 'buy',
-// size: '0.07000000',
-// price: '7467.00000000' 
-// }
+// { topic: 'trades:LTCAUD',
+//   ref: null,
+//   payload:
+//    { trades: [
+
+		// { value: '522.69',
+		// timestamp: '2019-04-21T05:43:12.673168Z',
+		// tid: 465063,
+		// taker_side: 'buy',
+		// size: '0.07000000',
+		// price: '7467.00000000' 
+		// }
+// ]
 
 
 // BINANCE
