@@ -51,7 +51,7 @@ var context = {
 		}
 	},
 	"forex_parameters":{
-		"forex_api": "http://www.apilayer.net/api/live?access_key=97ec6af4d54ae75ef9cf190f8706b6c7&currencies=AUD"
+		"forex_api": "https://api.exchangeratesapi.io/latest?base=AUD"
 	},
 	"selected_trading_pairs": {
 		"crypto_1": "LTC/USDT",
@@ -190,57 +190,15 @@ coinjarWss.on("open", function connection(socket){
 		coinjarData = coinjarDataObj["payload"];
 		
 		if (coinjarDataObj["topic"] !== "phoenix") {
-			console.log("received data from coinjar", coinjarDataObj)
+			if (coinjarDataObj["event"] == "init") {
+				for (var i = 0; i < coinjarDataObj.payload.trades.length; i ++){					
+					context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[i])
+				}
+			} else if (coinjarDataObj["event"] == "new") {
+				console.log("IAM DATA OBJ", coinjarDataObj.payload.trades[0])
+				context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[0])
+			}
 		}
-
-
-		// { topic: 'trades:ZECBTC',
-		  // ref: null,
-		  // payload:
-		  //  { trades:
-
-		// format
-		// { value: '522.69',
-	    // timestamp: '2019-04-21T05:43:12.673168Z',
-	    // tid: 465063,
-	    // taker_side: 'buy',
-	    // size: '0.07000000',
-	    // price: '7467.00000000' 
-		// }
-
-
-		// send data to graphing client
-
-		// if (coinjarData["status"] == "continuous") {
-		// 	var coinjarDate = moment(coinjarData.current_time).unix();
-			
-		// 	console.log("coinjardate", coinjarDate)
-			
-		// 	dataJSON = 
-
-		// 	{
-		// 		type : "trade",
-		// 		coinjar : {
-		// 			name : "coinjar",
-		// 			type : "trade",
-		// 			data : {
-		// 				x : coinjarDate,
-		// 				y : coinjarData.last /latestAUDUSDrate
-		// 			}	
-		// 		},
-		// 		binance: {
-		// 			name : "binance",
-		// 			type : "trade",
-		// 			data: {
-		// 				x : latestBinanceDate,
-		// 				y : latestBinancePriceUSD
-		// 			}
-		// 		}
-		// 	};
-		// 	console.log("am about to send data to client, ", dataJSON)
-
-		// }
-
 	});
 });
 
@@ -270,11 +228,9 @@ binance.websockets.trades([
 	], (trades) => {
 
 		let {e:eventType, E:eventTime, s:symbol, p:price, q:quantity, m:maker, a:tradeId} = trades;
-		// console.log("trades", trades, typeof(trades))
 
 		context.trading_data = updateTradingLog(context.trading_data, "binance", trades.s, trades)
-		console.log(context.trading_data)
-
+		// console.log(context.trading_data)
 	  // console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", maker: "+maker);
 
 
@@ -289,17 +245,13 @@ setInterval(function(){
 
 	axios.get(currency_conversion_endpoint)
 	  .then(response => {
-	  	// console.log("Forex Data type", response.data)
-	    if (response.data["quotes"]["USDAUD"] != undefined ) {
-		    latestAUDUSDrate = currencyObj["quotes"]["USDAUD"]
-	    }
-	    console.log(latestAUDUSDrate)
+	  	console.log("Forex Data type", response.data.rates.USD)
 	  })
 	  .catch(error => {
 	    console.log(error);
 	  });
 
-}, 60 * 60 * 1000)
+}, 5000)
 
 
 // update the context variable with latest trade data and format into the same format
@@ -309,10 +261,11 @@ setInterval(function(){
 // UPDATE THE CONTEXT VARIABLE
 
 function updateTradingLog (contextTradingObj, exchange, symbol, input){
+	// console.log("updateTradingLog", contextTradingObj, exchange, symbol, input)
 	var output = contextTradingObj;
 
 	var cleanInput = handleTradeData(exchange, input, symbol)
-	console.log("output", output)
+	// console.log("output", output)
 	output[exchange][symbol].push (cleanInput);
 	return output;
 }
@@ -321,7 +274,6 @@ function updateTradingLog (contextTradingObj, exchange, symbol, input){
 // PARSE AND CLEAN 1 INSTANCE OF TRADING DATA
 
 function handleTradeData (exchange, input, symbol){
-
 
 	var output = {
 		symbol: "",
