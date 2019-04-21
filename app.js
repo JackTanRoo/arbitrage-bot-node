@@ -31,7 +31,7 @@ var context = {
 		},
 		"binance" :{
 			"name": "binance",
-			"data_endpoint": "wss://stream.binance.com:9443/streams?streams=",
+			"data_endpoint": "wss://stream.binance.com:9443/",
 			"heartbeat_freq": 3 * 60 * 1000,
 			"channel_sub": {
 				"BTCUSD": "BTCUSDT",
@@ -219,9 +219,12 @@ coinjarWss.on("open", function connection(socket){
 //  get data feed from binance
 
 var binanceEndPoint = context["crypto_exchange_parameters"]["binance"]["data_endpoint"] 
-+ context["crypto_exchange_parameters"]["binance"]["channel_sub"].BTCUSD + "/" 
-+ context["crypto_exchange_parameters"]["binance"]["channel_sub"].LTCUSD + "/" 
-+ context["crypto_exchange_parameters"]["binance"]["channel_sub"].ZECUSD + "/" 
+// + context["crypto_exchange_parameters"]["binance"]["channel_sub"].BTCUSD + "@trade"
++ "ws/" + "BNBBTC@trade"
+
+console.log("binance end point", binanceEndPoint)
+// + context["crypto_exchange_parameters"]["binance"]["channel_sub"].LTCUSD + "/" 
+// + context["crypto_exchange_parameters"]["binance"]["channel_sub"].ZECUSD + "/" 
 
 
 var binanceWss = new WebSocket(binanceEndPoint);
@@ -245,7 +248,7 @@ binanceWss.on("open", function connection(socket){
 });
 
 binanceWss.on("error", function connection(socket){
-	// console.log("Server connected to binance")	
+	console.log("socket error", socket)	
 
 	// // set heartbeat every 40 seconds - coinjar requires every 45 seconds
 	// setInterval(function(){
