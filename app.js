@@ -24,11 +24,9 @@ var context = {
 			"heartbeat_freq": 40000,
 			"heartbeat_message": '{ "topic": "phoenix", "event": "heartbeat", "payload": {}, "ref": 0 }',
 			"channel_sub": {
-				"BTCUSD": '{ "topic": "trades:BTCUSD", "event": "phx_join", "payload": {}, "ref": 0 }',
-				"ZECUSD": '{ "topic": "trades:ZECUSD", "event": "phx_join", "payload": {}, "ref": 0 }',
 				"BTCAUD": '{ "topic": "trades:BTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }',
 				"LTCAUD": '{ "topic": "trades:LTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }',
-				"ZECAUD": '{ "topic": "trades:ZECAUD", "event": "phx_join", "payload": {}, "ref": 0 }'
+				"ZECAUD": '{ "topic": "trades:ZECBTC", "event": "phx_join", "payload": {}, "ref": 0 }'
 			}, 
 			"slippage": 0.01,
 			"fees": 0.001,
@@ -40,9 +38,9 @@ var context = {
 			"data_endpoint": "wss://stream.binance.com:9443",
 			"heartbeat_freq": 3 * 60 * 1000,
 			"channel_sub": {
-				"BTCUSD": "btcusdc@trade",
-				"ZECUSD": "zecusdc@trade",
-				"LTCUSD": "ltcusdc@trade"
+				"BTCUSD": "BTCUSDT",
+				"ZECUSD": "ZECUSDT",
+				"LTCUSD": "LTCUSDT"
 			},
 			"slippage": 0.005,
 			"fees": 0.001,
@@ -225,7 +223,7 @@ coinjarWss.on("open", function connection(socket){
 //  get data feed from binance
 
 
-binance.websockets.trades(['BNBBTC', 'ETHBTC'], (trades) => {
+binance.websockets.trades(["BTCUSDT", "ZECBTC", "LTCUSDT"], (trades) => {
   let {e:eventType, E:eventTime, s:symbol, p:price, q:quantity, m:maker, a:tradeId} = trades;
   console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", maker: "+maker);
 });
