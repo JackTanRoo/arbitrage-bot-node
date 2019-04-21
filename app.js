@@ -11,7 +11,7 @@ const binance = require('node-binance-api')().options({
   useServerTime: true // If you get timestamp errors, synchronize to server time at startup
 });
 
-var latestAUDUSDrate;
+var latestAUDUSDrate = 1.4;
 
 var context = {
 	"selected_exchanges": {
@@ -246,6 +246,7 @@ setInterval(function(){
 	axios.get(currency_conversion_endpoint)
 	  .then(response => {
 	  	console.log("Forex Data type", response.data.rates.USD)
+	  	latestAUDUSDrate = 1 / response.data.rates.USD;
 	  })
 	  .catch(error => {
 	    console.log(error);
@@ -292,8 +293,11 @@ function handleTradeData (exchange, input, symbol){
 	if (exchange == "coinjar") {
 		output.symbol = symbol;
 		output.time = moment(input.timestamp).unix();;
-		output.price = input.price;
 		output.quantity = input.size
+
+		if (symbol == "BTCAUD" || symbol == "LTCAUD"){
+			output.price = input.price * latestAUDUSDrate;
+		}
 	};
 
 	if (exchange == "forex") {
