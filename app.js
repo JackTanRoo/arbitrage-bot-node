@@ -11,6 +11,7 @@ const binance = require('node-binance-api')().options({
   useServerTime: true // If you get timestamp errors, synchronize to server time at startup
 });
 
+var latestAUDUSDrate;
 
 var context = {
 	"selected_exchanges": {
@@ -39,7 +40,7 @@ var context = {
 			"heartbeat_freq": 3 * 60 * 1000,
 			"channel_sub": {
 				"BTCUSD": "BTCUSDT",
-				"ZECUSD": "ZECUSDT",
+				"ZECBTC": "ZECBTC",
 				"LTCUSD": "LTCUSDT"
 			},
 			"slippage": 0.005,
@@ -62,17 +63,23 @@ var context = {
 	"amountToTrade": 0.05,
 	"trading_data": {
 		"binance": {
-			"BTCAUD" : [],
-			"LTCAUD" : [],
-			"ZECAUD" : [] 
+			"BTCUSD" : [],
+			"ZECBTC" : [],
+			"LTCUSD" : [] 
 		},
-		"coinjar":[],
-		"AUDUSD":[]
+		"coinjar": {
+			"BTCUSD" : [],
+			"ZECBTC" : [],
+			"LTCUSD" : [] 
+		},
+		"forex":{
+			"AUDUSD" : []
+		},
 	}
 };
 
 
-// graph of data points for each trading pair
+// FORMAT OF RAW DATA OUTPUTS FROM COINJAR AND BINANCE
 
 // trading_data: {
 	// binance: 
@@ -114,7 +121,7 @@ var context = {
 // }
 
 
-//  start app server on websocket 
+//  START SERVER
 
 var app = express();
 
@@ -136,7 +143,7 @@ var server = app.listen(port, function () {
  
 
 
-//Return data to the app client
+// START SERVER AND WEBSOCKET TO RETURN DATA TO FRONT END
 
 const wss = new WebSocket.Server({ server });
 
@@ -144,7 +151,9 @@ wss.on('connection', function connection(clientsocket) {
 	console.log("Arbiter client connected", clientsocket);
 });
 
-//  get data feed from Coinjar
+
+//  GET DATA FROM COINJAR
+
 //  LTC, BTC, zCash, Ripple
 
 
@@ -170,7 +179,7 @@ coinjarWss.on("open", function connection(socket){
 	// coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECUSD"]);
 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCAUD"]);
 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]);
-	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECAUD"]);
+	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCUSDT"]);
 
 
 	// get message from coinjar Socket
@@ -181,8 +190,25 @@ coinjarWss.on("open", function connection(socket){
 		coinjarData = coinjarDataObj["payload"]
 		
 		if (coinjarDataObj["topic"] !== "phoenix") {
-			console.log("received data from coinjar", coinjarDataObj)
+			// console.log("received data from coinjar", coinjarDataObj.payload.trades)
+
+
 		}
+
+
+		// { topic: 'trades:ZECBTC',
+		  // ref: null,
+		  // payload:
+		  //  { trades:
+
+		// format
+		// { value: '522.69',
+	    // timestamp: '2019-04-21T05:43:12.673168Z',
+	    // tid: 465063,
+	    // taker_side: 'buy',
+	    // size: '0.07000000',
+	    // price: '7467.00000000' 
+		// }
 
 
 		// send data to graphing client
@@ -220,87 +246,165 @@ coinjarWss.on("open", function connection(socket){
 	});
 });
 
-//  get data feed from binance
+// GET DATA FROM BINANCE
 
 
-binance.websockets.trades(["BTCUSDT", "ZECBTC", "LTCUSDT"], (trades) => {
+// output data format
+// { e: 'trade',
+//   E: 1555826431038, -- time
+//   s: 'LTCUSDT',     -- symbol
+//   t: 18885798,
+//   p: '80.05000000', -- price
+//   q: '8.35156000', - quantity
+//   b: 96354538,
+//   a: 96354552,
+//   T: 1555826431032,
+//   m: true, -- maker
+//   M: true 
+// }
+
+
+binance.websockets.trades([
+	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["BTCUSD"],
+	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["ZECBTC"],
+	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["LTCUSD"]
+
+	], (trades) => {
+
   let {e:eventType, E:eventTime, s:symbol, p:price, q:quantity, m:maker, a:tradeId} = trades;
+
   console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", maker: "+maker);
+
+
 });
 
+// get data for forex
+
+var currency_conversion_endpoint = context["forex_parameters"]["forex_api"];
+
+
+setInterval(function(){
+
+	axios.get(currency_conversion_endpoint)
+	  .then(response => {
+	  	// console.log("Forex Data type", response.data)
+	    if (response.data["quotes"]["USDAUD"] != undefined ) {
+		    latestAUDUSDrate = currencyObj["quotes"]["USDAUD"]
+	    }
+	    console.log(latestAUDUSDrate)
+	  })
+	  .catch(error => {
+	    console.log(error);
+	  });
+
+}, 60 * 60 * 1000)
+
+
+// update the context variable with latest trade data and format into the same format
+
+// context trading data variable format
+
+// UPDATE THE CONTEXT VARIABLE
 
 
 
 
-// var binanceEndPoint = context["crypto_exchange_parameters"]["binance"]["data_endpoint"] 
-// // + "/stream?streams=" 
-// // // + "bnbbtc@trade/"
-// // + "/" + context["crypto_exchange_parameters"]["binance"]["channel_sub"].BTCUSD
-// // + "/" + "bnbbtc@trade"
+// PARSE AND CLEAN 1 INSTANCE OF TRADING DATA
 
-// + "/stream?streams=/" + "ltcusdc@trade"
-// + "/" + "btcusdc@trade"
-// + "/" + "bnbbtc@trade"
-
-// // + context["crypto_exchange_parameters"]["binance"]["channel_sub"].LTCUSD + "/" 
-// // + context["crypto_exchange_parameters"]["binance"]["channel_sub"].ZECUSD + "/" 
-
-// // binance end point wss://stream.binance.com:9443/stream?streams=bnbbtc@trade/ltcusdt@trade/
-
-// console.log("binance end point", binanceEndPoint)
+function handleTradeData (exchange, input, symbol){
 
 
-// var binanceWss = new WebSocket(binanceEndPoint);
+	var output = {
+		symbol: ,
+		time: ,
+		price: ,
+		quantity: 
+	};
 
-// binanceWss.on("open", function connection(socket){
-// 	console.log("Server connected to binance", socket)	
+	if (exchange == "binance") {
+		output.symbol = input.s;
+		output.time = input.E;
+		output.price = input.p;
+		output.quantity = input.q
+	};
 
-// 	// // set heartbeat every 40 seconds - coinjar requires every 45 seconds
-// 	// setInterval(function(){
-// 	// 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
-// 	// 	// console.log("sending heart beat!")
-// 	// }, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
+	if (exchange == "coinjar") {
+		output.symbol = symbol;
+		output.time = moment(input.timestamp).unix();;
+		output.price = input.price;
+		output.quantity = input.size
+	};
 
-// 	// get message from coinjar Socket
-
-// 	binanceWss.on('message', function incoming(message) {
-		
-// 		console.log("got message from binance", message)
-
-// 	});
-// });
-
-// binanceWss.on("error", function connection(socket){
-// 	console.log("socket error", socket)	
-
-// 	// // set heartbeat every 40 seconds - coinjar requires every 45 seconds
-// 	// setInterval(function(){
-// 	// 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
-// 	// 	// console.log("sending heart beat!")
-// 	// }, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
-
-// 	// get message from coinjar Socket
-
-// 	binanceWss.on('message', function incoming(message) {
-		
-// 		console.log("got message from binance", message)
-
-// 	});
-// });
+	if (exchange == "forex") {
+		output.symbol = Object.keys(input.quotes)[0];
+		output.time = input.timestamp * 1000;;
+		output.price = input.quotes.USDAUD;
+		output.quantity = 
+	};
 
 
-// // on update of any of the data in the latest price feed, run the arbitrate algorithm
+	return output;
+}
+
+// FOREX
+// { success: true,
+//   terms: 'https://currencylayer.com/terms',
+//   privacy: 'https://currencylayer.com/privacy',
+//   timestamp: 1554438785,
+//   source: 'USD',
+//   quotes: { USDAUD: 1.40336 } }
 
 
 
-// // 
+// COINJAR
+// { value: '522.69',
+// timestamp: '2019-04-21T05:43:12.673168Z',
+// tid: 465063,
+// taker_side: 'buy',
+// size: '0.07000000',
+// price: '7467.00000000' 
+// }
 
 
+// BINANCE
+// { e: 'trade',
+//   E: 1555826431038, -- time to millisecond
+//   s: 'LTCUSDT',     -- symbol
+//   t: 18885798,
+//   p: '80.05000000', -- price
+//   q: '8.35156000', - quantity
+//   b: 96354538,
+//   a: 96354552,
+//   T: 1555826431032,
+//   m: true, -- maker
+//   M: true 
+// }
 
+// Binance : 
+	// {
+		// BTCUSD: 
+			// [
+				// {
+					// symbol: BTCUSDT,
+					// time: eventTime in unix,
+					// price: price
+					// quantity: quantity
+				// }
+			// ]
+	// }
 
-
-
-
+// Forex : 
+	// {
+		// AUDUSD: 
+			// [
+				// {
+					// s: AUDUSD,
+					// E: eventTime in unix,
+					// p: price
+					// q: undefined
+				// }
+			// ]
+	// }
 
 
 
