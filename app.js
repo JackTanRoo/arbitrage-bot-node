@@ -31,12 +31,12 @@ var context = {
 		},
 		"binance" :{
 			"name": "binance",
-			"data_endpoint": "wss://stream.binance.com:9443/",
+			"data_endpoint": "wss://stream.binance.com:9443",
 			"heartbeat_freq": 3 * 60 * 1000,
 			"channel_sub": {
-				"BTCUSD": "BTCUSDT",
-				"ZECUSD": "ZECUSDT",
-				"LTCUSD": "LTCUSDT"
+				"BTCUSD": "btcusdt@trade",
+				"ZECUSD": "zecusdc@trade",
+				"LTCUSD": "ltcusdt@trade"
 			},
 			"slippage": 0.005,
 			"fees": 0.001,
@@ -219,18 +219,22 @@ coinjarWss.on("open", function connection(socket){
 //  get data feed from binance
 
 var binanceEndPoint = context["crypto_exchange_parameters"]["binance"]["data_endpoint"] 
-// + context["crypto_exchange_parameters"]["binance"]["channel_sub"].BTCUSD + "@trade"
-+ "ws/" + "BNBBTC@trade"
++ "/stream?streams=" 
+// + "bnbbtc@trade/"
++ "/" + context["crypto_exchange_parameters"]["binance"]["channel_sub"].BTCUSD
 
-console.log("binance end point", binanceEndPoint)
 // + context["crypto_exchange_parameters"]["binance"]["channel_sub"].LTCUSD + "/" 
 // + context["crypto_exchange_parameters"]["binance"]["channel_sub"].ZECUSD + "/" 
+
+// binance end point wss://stream.binance.com:9443/stream?streams=bnbbtc@trade/ltcusdt@trade/
+
+console.log("binance end point", binanceEndPoint)
 
 
 var binanceWss = new WebSocket(binanceEndPoint);
 
 binanceWss.on("open", function connection(socket){
-	console.log("Server connected to binance")	
+	console.log("Server connected to binance", socket)	
 
 	// // set heartbeat every 40 seconds - coinjar requires every 45 seconds
 	// setInterval(function(){
