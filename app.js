@@ -307,9 +307,34 @@ function handleTradeData (exchange, input, symbol){
 		output.quantity;
 	};
 
-
 	return output;
-}
+};
+
+// SEARCH FOR ARBITRAGE OPPORTUNITIES
+
+// SIMPLE 2 WAY ARBITRAGE
+
+// When there is a new trade, search if there an arbitrage for same pair on a different exchange
+// 		BTC/USDT on Binance, Search for BTC / AUD (after Forex) On Coinjar
+// 		LTC/USDT on Binance, Search for LTC / AUD (after Forex) On Coinjar
+// 		ZEC/BTC on Binance, Search for ZEC / BTC On Coinjar
+
+
+
+// 3 WAY ARBITRAGE
+// When there is a new trade, search for 3 way arbitrage
+
+//		Buy BTC with USDT on Binance, Buy LTC with BTC on Coinjar, Buy USDT with LTC on Binance
+
+
+
+// 
+
+
+
+
+// When there is a a new trade, search if there is a 3 way arbitrage
+
 
 // FOREX
 // { success: true,
