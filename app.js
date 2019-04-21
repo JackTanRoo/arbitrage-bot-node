@@ -17,7 +17,12 @@ var context = {
 			"data_endpoint": "wss://feed.exchange.coinjar.com/socket/websocket",
 			"heartbeat_freq": 4500,
 			"heartbeat_message": '{ "topic": "phoenix", "event": "heartbeat", "payload": {}, "ref": 0 }',
-			"channel_sub": '{ "topic": "ticker:LTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }',
+			"channel_sub": {
+				"BTCUSD": '{ "topic": "trades:BTCUSD", "event": "phx_join", "payload": {}, "ref": 0 }',
+				"ZECUSD": '{ "topic": "trades:ZECUSD", "event": "phx_join", "payload": {}, "ref": 0 }',
+				"BTCAUD": '{ "topic": "trades:BTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }',
+				"LTCAUD": '{ "topic": "trades:LTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }'
+			}, 
 			"slippage": 0.01,
 			"fees": 0.001,
 			"current_fiat": 5000,
@@ -70,7 +75,7 @@ var context = {
 					//   "M": true         // Ignore
 					// }
 					// ]
-		//}
+		//},
 	// coinjar: 
 	// 	//{
 			// data: [
@@ -112,8 +117,15 @@ var server = app.listen(port, function () {
     console.log('node.js static server listening on port: ' + port + ", with websockets listener")
 });
  
+
+
+//Return data to the app client
+
 const wss = new WebSocket.Server({ server });
 
+wss.on('connection', function connection(clientsocket) {
+	console.log("Arbiter client connected", clientsocket);
+});
 
 //  get data feed from Coinjar
 //  LTC, BTC, zCash, Ripple
@@ -124,68 +136,67 @@ const wss = new WebSocket.Server({ server });
 	// {"topic":"ticker:LTCAUD","ref":null,"payload":{"volume":"181.00000000","transition_time":"2019-04-04T07:50:00Z","status":"continuous","session":11800,"prev_close":"117.80000000","last":"122.30000000","current_time":"2019-04-04T05:59:11.670951Z","bid":"116.40000000","ask":"122.10000000"},"event":"update"}
 
 
-wss.on('connection', function connection(clientsocket) {
-	console.log("I am connected", clientsocket);
+var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
 
-	var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
+coinjarWss.on("open", function connection(socket){
+	console.log("Server connected to coinjar")	
 
-	coinjarWss.on("open", function connection(socket){
-		console.log("I am have connected to coinjar")	
+	// set heartbeat every 40 seconds - coinjar requires every 45 seconds
+	setInterval(function(){
+		coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
+		// console.log("sending heart beat!")
+	}, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
 
-		// set heartbeat every 40 seconds - coinjar requires every 45 seconds
-		setInterval(function(){
-			coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
-			console.log("sending heart beat!")
-		}, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
 
-		// get message from coinjar Socket
+	// subscribe to coinjar token channel
+	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSD"]);
+	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECUSD"]);
+	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCAUD"]);
+	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]);
 
-		coinjarWss.on('message', function incoming(message) {
+	// get message from coinjar Socket
 
-			// coinjarWss.clients.forEach(client => {
-			//      client.send(message);
-			// });  
-			// console.log("received from a client: ",typeof(message));
+	coinjarWss.on('message', function incoming(message) {
+		
+		coinjarDataObj = JSON.parse(message);
+		coinjarData = coinjarDataObj["payload"]
+		
+		// if (coinjarData["status"] == "continuous") {
+			console.log("received data from coinjar", coinjarDataObj)
+		// }
+
+
+		// send data to graphing client
+
+		// if (coinjarData["status"] == "continuous") {
+		// 	var coinjarDate = moment(coinjarData.current_time).unix();
 			
-			coinjarDataObj = JSON.parse(message);
-			coinjarData = coinjarDataObj["payload"]
+		// 	console.log("coinjardate", coinjarDate)
 			
-			// send data to graphing client
+		// 	dataJSON = 
 
-			if (coinjarData["status"] == "continuous") {
-				var coinjarDate = moment(coinjarData.current_time).unix();
-				
-				console.log("coinjardate", coinjarDate)
-				
-				dataJSON = 
+		// 	{
+		// 		type : "trade",
+		// 		coinjar : {
+		// 			name : "coinjar",
+		// 			type : "trade",
+		// 			data : {
+		// 				x : coinjarDate,
+		// 				y : coinjarData.last /latestAUDUSDrate
+		// 			}	
+		// 		},
+		// 		binance: {
+		// 			name : "binance",
+		// 			type : "trade",
+		// 			data: {
+		// 				x : latestBinanceDate,
+		// 				y : latestBinancePriceUSD
+		// 			}
+		// 		}
+		// 	};
+		// 	console.log("am about to send data to client, ", dataJSON)
 
-				{
-					type : "trade",
-					coinjar : {
-						name : "coinjar",
-						type : "trade",
-						data : {
-							x : coinjarDate,
-							y : coinjarData.last /latestAUDUSDrate
-						}	
-					},
-					binance: {
-						name : "binance",
-						type : "trade",
-						data: {
-							x : latestBinanceDate,
-							y : latestBinancePriceUSD
-						}
-					}
-				};
-				console.log("am about to send data to client, ", dataJSON)
-
-			}
-
-
-		});  
-
-		coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]);
+		// }
 
 	});
 
