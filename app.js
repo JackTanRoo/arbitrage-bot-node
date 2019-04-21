@@ -31,7 +31,13 @@ var context = {
 		},
 		"binance" :{
 			"name": "binance",
-			"data_endpoint": "wss://feed.exchange.coinjar.com/socket/websocket",
+			"data_endpoint": "wss://stream.binance.com:9443/streams?streams=",
+			"heartbeat_freq": 3 * 60 * 1000,
+			"channel_sub": {
+				"BTCUSD": "BTCUSDT",
+				"ZECUSD": "ZECUSDT",
+				"LTCUSD": "LTCUSDT"
+			},
 			"slippage": 0.005,
 			"fees": 0.001,
 			"current_fiat": 5000,
@@ -59,7 +65,8 @@ var context = {
 		"coinjar":[],
 		"AUDUSD":[]
 	}
-}
+};
+
 
 // graph of data points for each trading pair
 
@@ -211,7 +218,49 @@ coinjarWss.on("open", function connection(socket){
 
 //  get data feed from binance
 
+var binanceEndPoint = context["crypto_exchange_parameters"]["binance"]["data_endpoint"] 
++ context["crypto_exchange_parameters"]["binance"]["channel_sub"].BTCUSD + "/" 
++ context["crypto_exchange_parameters"]["binance"]["channel_sub"].LTCUSD + "/" 
++ context["crypto_exchange_parameters"]["binance"]["channel_sub"].ZECUSD + "/" 
 
+
+var binanceWss = new WebSocket(binanceEndPoint);
+
+binanceWss.on("open", function connection(socket){
+	console.log("Server connected to binance")	
+
+	// // set heartbeat every 40 seconds - coinjar requires every 45 seconds
+	// setInterval(function(){
+	// 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
+	// 	// console.log("sending heart beat!")
+	// }, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
+
+	// get message from coinjar Socket
+
+	binanceWss.on('message', function incoming(message) {
+		
+		console.log("got message from binance", message)
+
+	});
+});
+
+binanceWss.on("error", function connection(socket){
+	// console.log("Server connected to binance")	
+
+	// // set heartbeat every 40 seconds - coinjar requires every 45 seconds
+	// setInterval(function(){
+	// 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
+	// 	// console.log("sending heart beat!")
+	// }, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
+
+	// get message from coinjar Socket
+
+	binanceWss.on('message', function incoming(message) {
+		
+		console.log("got message from binance", message)
+
+	});
+});
 
 
 // on update of any of the data in the latest price feed, run the arbitrate algorithm
