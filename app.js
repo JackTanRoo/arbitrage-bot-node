@@ -4,6 +4,12 @@ var path = require('path');
 var ccxt = require("ccxt");
 const axios = require('axios');
 var moment = require("moment");
+var binanceKey = require("./binance-key");
+
+const binance = require('node-binance-api')().options({
+  APIKEY: binanceKey.APIKEY,
+  useServerTime: true // If you get timestamp errors, synchronize to server time at startup
+});
 
 
 var context = {
@@ -34,9 +40,9 @@ var context = {
 			"data_endpoint": "wss://stream.binance.com:9443",
 			"heartbeat_freq": 3 * 60 * 1000,
 			"channel_sub": {
-				"BTCUSD": "btcusdt@trade",
+				"BTCUSD": "btcusdc@trade",
 				"ZECUSD": "zecusdc@trade",
-				"LTCUSD": "ltcusdt@trade"
+				"LTCUSD": "ltcusdc@trade"
 			},
 			"slippage": 0.005,
 			"fees": 0.001,
@@ -218,63 +224,78 @@ coinjarWss.on("open", function connection(socket){
 
 //  get data feed from binance
 
-var binanceEndPoint = context["crypto_exchange_parameters"]["binance"]["data_endpoint"] 
-+ "/stream?streams=" 
-// + "bnbbtc@trade/"
-+ "/" + context["crypto_exchange_parameters"]["binance"]["channel_sub"].BTCUSD
 
-// + context["crypto_exchange_parameters"]["binance"]["channel_sub"].LTCUSD + "/" 
-// + context["crypto_exchange_parameters"]["binance"]["channel_sub"].ZECUSD + "/" 
-
-// binance end point wss://stream.binance.com:9443/stream?streams=bnbbtc@trade/ltcusdt@trade/
-
-console.log("binance end point", binanceEndPoint)
-
-
-var binanceWss = new WebSocket(binanceEndPoint);
-
-binanceWss.on("open", function connection(socket){
-	console.log("Server connected to binance", socket)	
-
-	// // set heartbeat every 40 seconds - coinjar requires every 45 seconds
-	// setInterval(function(){
-	// 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
-	// 	// console.log("sending heart beat!")
-	// }, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
-
-	// get message from coinjar Socket
-
-	binanceWss.on('message', function incoming(message) {
-		
-		console.log("got message from binance", message)
-
-	});
-});
-
-binanceWss.on("error", function connection(socket){
-	console.log("socket error", socket)	
-
-	// // set heartbeat every 40 seconds - coinjar requires every 45 seconds
-	// setInterval(function(){
-	// 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
-	// 	// console.log("sending heart beat!")
-	// }, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
-
-	// get message from coinjar Socket
-
-	binanceWss.on('message', function incoming(message) {
-		
-		console.log("got message from binance", message)
-
-	});
+binance.websockets.trades(['BNBBTC', 'ETHBTC'], (trades) => {
+  let {e:eventType, E:eventTime, s:symbol, p:price, q:quantity, m:maker, a:tradeId} = trades;
+  console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", maker: "+maker);
 });
 
 
-// on update of any of the data in the latest price feed, run the arbitrate algorithm
 
 
 
-// 
+// var binanceEndPoint = context["crypto_exchange_parameters"]["binance"]["data_endpoint"] 
+// // + "/stream?streams=" 
+// // // + "bnbbtc@trade/"
+// // + "/" + context["crypto_exchange_parameters"]["binance"]["channel_sub"].BTCUSD
+// // + "/" + "bnbbtc@trade"
+
+// + "/stream?streams=/" + "ltcusdc@trade"
+// + "/" + "btcusdc@trade"
+// + "/" + "bnbbtc@trade"
+
+// // + context["crypto_exchange_parameters"]["binance"]["channel_sub"].LTCUSD + "/" 
+// // + context["crypto_exchange_parameters"]["binance"]["channel_sub"].ZECUSD + "/" 
+
+// // binance end point wss://stream.binance.com:9443/stream?streams=bnbbtc@trade/ltcusdt@trade/
+
+// console.log("binance end point", binanceEndPoint)
+
+
+// var binanceWss = new WebSocket(binanceEndPoint);
+
+// binanceWss.on("open", function connection(socket){
+// 	console.log("Server connected to binance", socket)	
+
+// 	// // set heartbeat every 40 seconds - coinjar requires every 45 seconds
+// 	// setInterval(function(){
+// 	// 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
+// 	// 	// console.log("sending heart beat!")
+// 	// }, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
+
+// 	// get message from coinjar Socket
+
+// 	binanceWss.on('message', function incoming(message) {
+		
+// 		console.log("got message from binance", message)
+
+// 	});
+// });
+
+// binanceWss.on("error", function connection(socket){
+// 	console.log("socket error", socket)	
+
+// 	// // set heartbeat every 40 seconds - coinjar requires every 45 seconds
+// 	// setInterval(function(){
+// 	// 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
+// 	// 	// console.log("sending heart beat!")
+// 	// }, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
+
+// 	// get message from coinjar Socket
+
+// 	binanceWss.on('message', function incoming(message) {
+		
+// 		console.log("got message from binance", message)
+
+// 	});
+// });
+
+
+// // on update of any of the data in the latest price feed, run the arbitrate algorithm
+
+
+
+// // 
 
 
 
