@@ -43,8 +43,53 @@ var context = {
 		"fiat_2": "USD"
 	},
 	"marginOfError": 0.01,
-	"amountToTrade": 0.05
+	"amountToTrade": 0.05,
+	"trading_data": {
+		"binance": [],
+		"coinjar":[]
+	}
 }
+
+// graph of data points for each trading pair
+
+// trading_data: {
+	// binance: 
+		//{
+			// data: [
+			// 			{
+					//   "e": "trade",     // Event type
+					//   "E": 123456789,   // Event time
+					//   "s": "BNBBTC",    // Symbol
+					//   "t": 12345,       // Trade ID
+					//   "p": "0.001",     // Price
+					//   "q": "100",       // Quantity
+					//   "b": 88,          // Buyer order ID
+					//   "a": 50,          // Seller order ID
+					//   "T": 123456785,   // Trade time
+					//   "m": true,        // Is the buyer the market maker?
+					//   "M": true         // Ignore
+					// }
+					// ]
+		//}
+	// coinjar: 
+	// 	//{
+			// data: [
+			// 			{
+					//   "e": "trade",     // Event type
+					//   "E": 123456789,   // Event time
+					//   "s": "BNBBTC",    // Symbol
+					//   "t": 12345,       // Trade ID
+					//   "p": "0.001",     // Price
+					//   "q": "100",       // Quantity
+					//   "b": 88,          // Buyer order ID
+					//   "a": 50,          // Seller order ID
+					//   "T": 123456785,   // Trade time
+					//   "m": true,        // Is the buyer the market maker?
+					//   "M": true         // Ignore
+					// }
+					// ]
+		//}
+// }
 
 
 //  start app server on websocket 
@@ -68,3 +113,101 @@ var server = app.listen(port, function () {
 });
  
 const wss = new WebSocket.Server({ server });
+
+
+//  get data feed from Coinjar
+//  LTC, BTC, zCash, Ripple
+
+
+// establish connection with coinjar and pull data
+	// Format of client return
+	// {"topic":"ticker:LTCAUD","ref":null,"payload":{"volume":"181.00000000","transition_time":"2019-04-04T07:50:00Z","status":"continuous","session":11800,"prev_close":"117.80000000","last":"122.30000000","current_time":"2019-04-04T05:59:11.670951Z","bid":"116.40000000","ask":"122.10000000"},"event":"update"}
+
+
+wss.on('connection', function connection(clientsocket) {
+	console.log("I am connected", clientsocket);
+
+	var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
+
+	coinjarWss.on("open", function connection(socket){
+		console.log("I am have connected to coinjar")	
+
+		// set heartbeat every 40 seconds - coinjar requires every 45 seconds
+		setInterval(function(){
+			coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
+			console.log("sending heart beat!")
+		}, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
+
+		// get message from coinjar Socket
+
+		coinjarWss.on('message', function incoming(message) {
+
+			// coinjarWss.clients.forEach(client => {
+			//      client.send(message);
+			// });  
+			// console.log("received from a client: ",typeof(message));
+			
+			coinjarDataObj = JSON.parse(message);
+			coinjarData = coinjarDataObj["payload"]
+			
+			// send data to graphing client
+
+			if (coinjarData["status"] == "continuous") {
+				var coinjarDate = moment(coinjarData.current_time).unix();
+				
+				console.log("coinjardate", coinjarDate)
+				
+				dataJSON = 
+
+				{
+					type : "trade",
+					coinjar : {
+						name : "coinjar",
+						type : "trade",
+						data : {
+							x : coinjarDate,
+							y : coinjarData.last /latestAUDUSDrate
+						}	
+					},
+					binance: {
+						name : "binance",
+						type : "trade",
+						data: {
+							x : latestBinanceDate,
+							y : latestBinancePriceUSD
+						}
+					}
+				};
+				console.log("am about to send data to client, ", dataJSON)
+
+			}
+
+
+		});  
+
+		coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]);
+
+	});
+
+});
+
+//  get data feed from binance
+
+
+
+
+// on update of any of the data in the latest price feed, run the arbitrate algorithm
+
+
+
+// 
+
+
+
+
+
+
+
+
+
+
