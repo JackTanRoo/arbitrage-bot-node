@@ -497,10 +497,8 @@ function handleTradeData (exchange, symbol, input){
 // }
 
 function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchangeobj2){
-	console.log("I am in twoWay arbitrage", volumeToTrade, exchangeobj1, exchangeobj2)
 
 	var price_exchange_one = exchangeobj1.price
-    console.log("variables 0", price_exchange_one)
 	var price_exchange_two = exchangeobj2.price
 
 
@@ -518,9 +516,6 @@ function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchangeobj2){
 
 	var estimated_buy_total_price = volumeToTrade * context["crypto_exchange_parameters"][exchange_1]["current_fiat"]
 
-    console.log("variables 1", price_exchange_two, price_exchange_two, exchange_1, exchange_2, symbol_1, symbol_2, margin_of_error)
-
-
 	// units to buy refers to units of crypto to buy = (amount to trade - fees) / final price of crypto
 
 	var units_to_buy = (estimated_buy_total_price * (1 - context["crypto_exchange_parameters"][exchange_1]['fees'])) / (estimated_buy_unit_price );
@@ -529,18 +524,12 @@ function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchangeobj2){
 
 	var estimated_sell_total_price =  units_to_buy * estimated_sell_unit_price * (1 - context["crypto_exchange_parameters"][exchange_2]['fees']);
     
-    console.log("variables 2", units_to_buy, estimated_sell_unit_price, estimated_sell_total_price)
 
 	// IF BUYING EXCHANGE 1
 
     var ROI_buy_exchange1 = (estimated_sell_total_price - estimated_buy_total_price) / estimated_buy_total_price * 100;
 
     var ROI_buy_exchange2 = (estimated_buy_total_price - estimated_sell_total_price) / estimated_sell_total_price * 100;
-
-    console.log("ROI Exchange 1", ROI_buy_exchange1)
-    console.log("ROI Exchange 2", ROI_buy_exchange2)
-
-
 
     if (ROI_buy_exchange1 >=  margin_of_error){
     	console.log("buy BTC at Exchange 1, sell BTC at Exchange 2, make x ROI return")
