@@ -22,7 +22,7 @@ var context = {
 		"coinjar": {
 			"name": "coinjar",
 			"data_endpoint": "wss://feed.exchange.coinjar.com/socket/websocket",
-			"heartbeat_freq": 10000,
+			"heartbeat_freq": 15000,
 			"heartbeat_message": '{ "topic": "phoenix", "event": "heartbeat", "payload": {}, "ref": 0 }',
 			"channel_sub": {
 				"BTCAUD": '{ "topic": "trades:BTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }',
@@ -63,21 +63,64 @@ var context = {
 	"amountToTrade": 0.05,
 	"trading_data": {
 		"binance": {
-			"BTCUSDT" : [
-				// {
-					// symbol: "",
-					// time: "",
-					// price: "",
-					// quantity: "" 
-				// }
+			"BTCUSDT" : 
+			[
+				{
+				symbol: "BTCUSDT",
+				time: 15000000000,
+				price: 1,
+				quantity: 1,
+				exchange: "binance" 
+				}
 			],
-			"ZECBTC" : [],
-			"LTCUSDT" : [] 
+			"ZECBTC" : [
+				{
+				symbol: "ZECBTC",
+				time: 15000000000,
+				price: 1,
+				quantity: 1,
+				exchange: "binance" 
+				}
+			],
+			"LTCUSDT" : [
+				{
+				symbol: "LTCUSDT",
+				time: 15000000000,
+				price: 1,
+				quantity: 1,
+				exchange: "binance" 
+				}
+			] 
 		},
 		"coinjar": {
-			"BTCAUD" : [],
-			"LTCAUD" : [],
-			"ZECBTC" : [] 
+			"BTCAUD" : 
+			[
+				{
+				symbol: "BTCAUD",
+				time: 15000000000,
+				price: 0.8,
+				quantity: 1,
+				exchange: "coinjar" 
+				}
+			],
+			"ZECBTC" : [
+				{
+				symbol: "ZECBTC",
+				time: 15000000000,
+				price: 0.7,
+				quantity: 1,
+				exchange: "coinjar" 
+				}
+			],
+			"LTCAUD" : [
+				{
+				symbol: "LTCAUD",
+				time: 15000000000,
+				price: 0.6,
+				quantity: 1,
+				exchange: "coinjar" 
+				}
+			] 
 		},
 		"forex":{
 			"AUDUSD" : []
@@ -249,9 +292,15 @@ var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"][
 coinjarWss.on("open", function connection(socket){
 	console.log("Server connected to coinjar")	
 
+	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSDT"]);
+	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]);
+	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECBTC"]);
+
 	// set heartbeat every 40 seconds - coinjar requires every 45 seconds
 	setInterval(function(){
-		coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]);
+		coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"], function(error){
+			console.log(error)
+		});
 		// console.log("sending heart beat!")
 	}, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
 
@@ -259,9 +308,6 @@ coinjarWss.on("open", function connection(socket){
 	// subscribe to coinjar token channel
 	// coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSD"]);
 	// coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECUSD"]);
-	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSDT"]);
-	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]);
-	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECBTC"]);
 
 
 	// get message from coinjar Socket
@@ -301,9 +347,12 @@ coinjarWss.on("open", function connection(socket){
 //   M: true 
 // }
 
+setTimeout(function(){
+
+
 
 binance.websockets.trades([
-	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["BTCAUD"],
+	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["BTCUSDT"],
 	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["ZECBTC"],
 	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["LTCUSDT"]
 
@@ -316,8 +365,11 @@ binance.websockets.trades([
 		var lastTrade = context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1]
 
 		if (isTwoWayArbitrage(1, 
-			context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1], 
-			context.trading_data.coinjar[coinJarOppositePair][context.trading_data.coinjar[coinJarOppositePair].length-1]).profitable)
+			context.trading_data.binance[trades.s]
+			[context.trading_data.binance[trades.s].length-1], 
+			context.trading_data.coinjar[coinJarOppositePair]
+			[context.trading_data.coinjar[coinJarOppositePair]
+			.length-1]).profitable)
 		{
 			context.arbitrage_opportunities.allOpportunities[lastTrade.time] = 
 				isTwoWayArbitrage(1, 
@@ -331,25 +383,26 @@ binance.websockets.trades([
 	  // console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", maker: "+maker);
 
 
-});
+})}, 
+20000);
 
 // GET DATA FROM FOREXT
 
-var currency_conversion_endpoint = context["forex_parameters"]["forex_api"];
+// var currency_conversion_endpoint = context["forex_parameters"]["forex_api"];
 
 
-setInterval(function(){
+// setInterval(function(){
 
-	axios.get(currency_conversion_endpoint)
-	  .then(response => {
-	  	console.log("Forex Data type", response.data.rates.USD)
-	  	latestAUDUSDrate = 1 / response.data.rates.USD;
-	  })
-	  .catch(error => {
-	    console.log(error);
-	  });
+// 	axios.get(currency_conversion_endpoint)
+// 	  .then(response => {
+// 	  	console.log("Forex Data type", response.data.rates.USD)
+// 	  	latestAUDUSDrate = 1 / response.data.rates.USD;
+// 	  })
+// 	  .catch(error => {
+// 	    console.log(error);
+// 	  });
 
-}, 5000)
+// }, 5000)
 
 
 // update the context variable with latest trade data and format into the same format
@@ -363,10 +416,10 @@ function updateTradingLog (contextTradingObj, exchange, symbol, input){
 	var output = contextTradingObj;
 
 	var cleanInput = handleTradeData(exchange, symbol, input)
-	// console.log("output", output)
 	
 	output[exchange][symbol].push(cleanInput);
-	
+	console.log("output", output)
+
 	return output;
 
 };
@@ -443,10 +496,13 @@ function handleTradeData (exchange, symbol, input){
 	// 	}
 // }
 
-function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchange2obj, ){
+function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchangeobj2){
+	console.log("I am in twoWay arbitrage", volumeToTrade, exchangeobj1, exchangeobj2)
 
 	var price_exchange_one = exchangeobj1.price
+    console.log("variables 0", price_exchange_one)
 	var price_exchange_two = exchangeobj2.price
+
 
 	var exchange_1 = exchangeobj1.exchange
 	var exchange_2 = exchangeobj2.exchange
@@ -462,6 +518,9 @@ function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchange2obj, ){
 
 	var estimated_buy_total_price = volumeToTrade * context["crypto_exchange_parameters"][exchange_1]["current_fiat"]
 
+    console.log("variables 1", price_exchange_two, price_exchange_two, exchange_1, exchange_2, symbol_1, symbol_2, margin_of_error)
+
+
 	// units to buy refers to units of crypto to buy = (amount to trade - fees) / final price of crypto
 
 	var units_to_buy = (estimated_buy_total_price * (1 - context["crypto_exchange_parameters"][exchange_1]['fees'])) / (estimated_buy_unit_price );
@@ -470,12 +529,17 @@ function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchange2obj, ){
 
 	var estimated_sell_total_price =  units_to_buy * estimated_sell_unit_price * (1 - context["crypto_exchange_parameters"][exchange_2]['fees']);
     
+    console.log("variables 2", units_to_buy, estimated_sell_unit_price, estimated_sell_total_price)
 
 	// IF BUYING EXCHANGE 1
 
     var ROI_buy_exchange1 = (estimated_sell_total_price - estimated_buy_total_price) / estimated_buy_total_price * 100;
 
     var ROI_buy_exchange2 = (estimated_buy_total_price - estimated_sell_total_price) / estimated_sell_total_price * 100;
+
+    console.log("ROI Exchange 1", ROI_buy_exchange1)
+    console.log("ROI Exchange 2", ROI_buy_exchange2)
+
 
 
     if (ROI_buy_exchange1 >=  margin_of_error){
@@ -486,6 +550,7 @@ function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchange2obj, ){
 	// IF SELLING EXCHANGE 2
     
     else if (ROI_buy_exchange2 >=  margin_of_error){
+    	console.log("buy BTC at Exchange 1, sell BTC at Exchange 2, make x ROI return")
     	output = parseArbitrageObj(exchangeobj2, exchangeobj1, ROI_buy_exchange2, units_to_buy);
     }
 
