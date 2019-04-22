@@ -63,7 +63,14 @@ var context = {
 	"amountToTrade": 0.05,
 	"trading_data": {
 		"binance": {
-			"BTCUSDT" : [],
+			"BTCUSDT" : [
+				// {
+					// symbol: "",
+					// time: "",
+					// price: "",
+					// quantity: "" 
+				// }
+			],
 			"ZECBTC" : [],
 			"LTCUSDT" : [] 
 		},
@@ -75,7 +82,82 @@ var context = {
 		"forex":{
 			"AUDUSD" : []
 		},
-	}
+	},
+	"twoWayLookup" :{
+		BTCUSDT : "BTCAUD",
+		LTCUSDT : "LTCAUD",
+		ZECBTC : "ZECBTC", 
+		BTCAUD : "BTCUSDT",
+		LTCAUD : "LTCUSDT",			
+	},
+	"arbitrage_opportunities":{
+		selected : {
+			// 150230214310 : {
+
+			// }
+		},
+		allOpportunities : {
+			// 12325315314 : {
+
+			// }
+		}
+		// selected : {
+		// 	// trade_id: belo
+		// },
+		// allOpportunities: {
+
+		
+		// 15105104313 : {
+		// 	// {
+		// selected: true or false
+		// trade_id: 1
+		// type_of_trade: twoWay or threeWay,
+		// time_of_trade: trades.first.time,
+		// ROI_of_trade: ROI
+		// trades: {
+			// first: {
+			// 	exchange: binance
+			// 	symbol: BTCUSDT
+			//  indexTradeData: Index in the Trade Data Array
+			// 	trade: buy
+			// 	time: time
+			// 	buyAsset: BTC
+			// 	sellAsset: USDT
+			// 	buyPrice: BTC/USDT Price
+			// 	buyQuantity: quantity of buyAsset bought
+			// 	sellQuantity: quantity of sellAsset sold
+			// },
+			// second: {
+			// 	exchange: binance
+			// 	symbol: BTCUSDT
+			//  indexTradeData: Index in the Trade Data Array
+			// 	trade: buy
+			// 	time: time
+			// 	buyAsset: BTC
+			// 	sellAsset: USDT
+			// 	buyPrice: BTC/USDT Price
+			// 	buyQuantity: quantity of buyAsset bought
+			// 	sellQuantity: quantity of sellAsset sold
+			// },
+			// third: {
+			// 	exchange: binance
+			// 	symbol: BTCUSDT
+			//  indexTradeData: Index in the Trade Data Array
+			// 	trade: buy
+			// 	time: time
+			// 	buyAsset: BTC
+			// 	sellAsset: USDT
+			// 	buyPrice: BTC/USDT Price
+			// 	buyQuantity: quantity of buyAsset bought
+			// 	sellQuantity: quantity of sellAsset sold
+			// },
+		// }
+		// exchange_first: exchangeName,
+		// time_first: exchangeNameTime,
+		// time_second: 
+	// }
+		// }
+	}	
 };
 
 
@@ -177,7 +259,7 @@ coinjarWss.on("open", function connection(socket){
 	// subscribe to coinjar token channel
 	// coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSD"]);
 	// coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECUSD"]);
-	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCAUD"]);
+	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSDT"]);
 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]);
 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECBTC"]);
 
@@ -221,15 +303,30 @@ coinjarWss.on("open", function connection(socket){
 
 
 binance.websockets.trades([
-	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["BTCUSDT"],
+	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["BTCAUD"],
 	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["ZECBTC"],
 	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["LTCUSDT"]
 
 	], (trades) => {
 
 		let {e:eventType, E:eventTime, s:symbol, p:price, q:quantity, m:maker, a:tradeId} = trades;
+		context.trading_data = updateTradingLog(context.trading_data, "binance", trades.s, trades);
+		
+		var coinJarOppositePair = context.twoWayLookup[trades.s];
+		var lastTrade = context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1]
 
-		context.trading_data = updateTradingLog(context.trading_data, "binance", trades.s, trades)
+		if (isTwoWayArbitrage(1, 
+			context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1], 
+			context.trading_data.coinjar[coinJarOppositePair][context.trading_data.coinjar[coinJarOppositePair].length-1]).profitable)
+		{
+			context.arbitrage_opportunities.allOpportunities[lastTrade.time] = 
+				isTwoWayArbitrage(1, 
+				context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1], 
+				context.trading_data.coinjar[coinJarOppositePair][context.trading_data.coinjar[coinJarOppositePair].length-1])
+
+			console.log("there is a profitable trade", context.arbitrage_opportunities)
+		}
+
 		// console.log(context.trading_data)
 	  // console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", maker: "+maker);
 
@@ -265,29 +362,33 @@ function updateTradingLog (contextTradingObj, exchange, symbol, input){
 	// console.log("updateTradingLog", contextTradingObj, exchange, symbol, input)
 	var output = contextTradingObj;
 
-	var cleanInput = handleTradeData(exchange, input, symbol)
+	var cleanInput = handleTradeData(exchange, symbol, input)
 	// console.log("output", output)
-	output[exchange][symbol].push (cleanInput);
+	
+	output[exchange][symbol].push(cleanInput);
+	
 	return output;
-}
+
+};
 
 
 // PARSE AND CLEAN 1 INSTANCE OF TRADING DATA
 
-function handleTradeData (exchange, input, symbol){
+function handleTradeData (exchange, symbol, input){
 
 	var output = {
 		symbol: "",
 		time: "",
 		price: "",
-		quantity: "" 
+		quantity: "",
+		exchange: exchange
 	};
 
 	if (exchange == "binance") {
 		output.symbol = input.s;
 		output.time = input.E;
 		output.price = input.p;
-		output.quantity = input.q
+		output.quantity = input.q;
 	};
 
 	if (exchange == "coinjar") {
@@ -318,6 +419,156 @@ function handleTradeData (exchange, input, symbol){
 // 		BTC/USDT on Binance, Search for BTC / AUD (after Forex) On Coinjar
 // 		LTC/USDT on Binance, Search for LTC / AUD (after Forex) On Coinjar
 // 		ZEC/BTC on Binance, Search for ZEC / BTC On Coinjar
+
+
+// return {
+	// profitable : true or false,
+	// trade_id: 1
+	// type_of_trade: twoWay or threeWay,
+	// time_of_trade: trades.first.time,
+	// ROI_of_trade: ROI
+	// first: {
+			// first: {
+			// 	exchange: binance
+			// 	symbol: BTCUSDT
+			//  indexTradeData: Index in the Trade Data Array
+			// 	time: time
+			// 	buy: {
+					// asset: BTC
+					// price: buyPrice
+					// quantity: quantity
+				// }
+				// sell: {}
+			// },
+	// 	}
+// }
+
+function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchange2obj, ){
+
+	var price_exchange_one = exchangeobj1.price
+	var price_exchange_two = exchangeobj2.price
+
+	var exchange_1 = exchangeobj1.exchange
+	var exchange_2 = exchangeobj2.exchange
+
+	var symbol_1 = exchangeobj1.symbol
+	var symbol_2 = exchangeobj2.symbol
+
+	var margin_of_error = context.marginOfError
+
+	var output = {};
+
+	var estimated_buy_unit_price = price_exchange_one * (1 + context["crypto_exchange_parameters"][exchange_1]['slippage']);
+
+	var estimated_buy_total_price = volumeToTrade * context["crypto_exchange_parameters"][exchange_1]["current_fiat"]
+
+	// units to buy refers to units of crypto to buy = (amount to trade - fees) / final price of crypto
+
+	var units_to_buy = (estimated_buy_total_price * (1 - context["crypto_exchange_parameters"][exchange_1]['fees'])) / (estimated_buy_unit_price );
+    
+    var estimated_sell_unit_price = price_exchange_two * (1 - context["crypto_exchange_parameters"][exchange_2]['slippage']);
+
+	var estimated_sell_total_price =  units_to_buy * estimated_sell_unit_price * (1 - context["crypto_exchange_parameters"][exchange_2]['fees']);
+    
+
+	// IF BUYING EXCHANGE 1
+
+    var ROI_buy_exchange1 = (estimated_sell_total_price - estimated_buy_total_price) / estimated_buy_total_price * 100;
+
+    var ROI_buy_exchange2 = (estimated_buy_total_price - estimated_sell_total_price) / estimated_sell_total_price * 100;
+
+
+    if (ROI_buy_exchange1 >=  margin_of_error){
+    	console.log("buy BTC at Exchange 1, sell BTC at Exchange 2, make x ROI return")
+    	output = parseArbitrageObj(exchangeobj1, exchangeobj2, ROI_buy_exchange1, units_to_buy);
+    } 
+
+	// IF SELLING EXCHANGE 2
+    
+    else if (ROI_buy_exchange2 >=  margin_of_error){
+    	output = parseArbitrageObj(exchangeobj2, exchangeobj1, ROI_buy_exchange2, units_to_buy);
+    }
+
+    return output;
+};
+
+
+function parseArbitrageObj (exchange1Obj, exchange2Obj, ROI, units_to_buy){
+	var output = {
+		profitable : true,
+		trade_id: Object.keys(context.arbitrage_opportunities.allOpportunities).length,
+		type_of_trade: 2,
+		time_of_trade: exchange1Obj.time,
+		ROI_of_trade: ROI,
+		first: {
+				exchange: exchange1Obj.exchange,
+				symbol: exchange1Obj.symbol,
+				indexTradeData: context.trading_data[exchange1Obj.exchange].length-1,
+				time: exchange1Obj.time,
+				buy: {
+					asset: exchange1Obj.symbol.substr(0,3),
+					price: exchange1Obj.price, // price to get 1 BTC or 1 buy asset
+					quantity: units_to_buy
+				},
+ 				sell: {
+					asset: exchange1Obj.symbol.substr(3,exchange1Obj.symbol.length-3),
+					price: 1 / exchange1Obj.price,
+					quantity: (exchange1Obj.price * units_to_buy)
+				}
+			},
+		second: {
+				exchange: exchange2Obj.exchange,
+				symbol: exchange2Obj.symbol,
+				indexTradeData: context.trading_data[exchange2Obj.exchange].length-1,
+				time: exchange2Obj.time,
+				buy: {
+					asset: exchange2Obj.symbol.substr(0,3),
+					price: exchange2Obj.price, // price to get 1 BTC or 1 buy asset
+					quantity: units_to_buy
+				},
+ 				sell: {
+					asset: exchange2Obj.symbol.substr(3,exchange2Obj.symbol.length-3),
+					price: 1 / exchange2Obj.price,
+					quantity: (exchange2Obj.price * units_to_buy)
+				}
+			}
+	}
+
+	return output;
+
+};
+
+// 	input Obj = {
+		// symbol: "",
+		// time: "",
+		// price: "",
+		// quantity: "",
+		// exchange: exchange
+	// }
+
+	// return {
+		// profitable : true or false,
+		// trade_id: 1
+		// type_of_trade: twoWay or threeWay,
+		// time_of_trade: trades.first.time,
+		// ROI_of_trade: ROI
+		// first: {
+				// first: {
+				// 	exchange: binance
+				// 	symbol: BTCUSDT
+				//  indexTradeData: Index in the Trade Data Array
+				// 	time: time
+				// 	buy: {
+						// asset: BTC
+						// price: buyPrice
+						// quantity: quantity
+					// }
+					// sell: {}
+				// },
+		// 	}
+	// }
+
+
 
 
 
@@ -403,4 +654,56 @@ function handleTradeData (exchange, input, symbol){
 	// }
 
 
+function updateArbitrageLog (volumeToTrade, exchange1Obj, exchange2Obj, exchange3Obj){
+	
+	// return output
+
+	// {
+		// trade_id: 1
+		// type_of_trade: twoWay or threeWay,
+		// time_of_trade: trades.first.time,
+		// ROI_of_trade: ROI
+		// trades: {
+			// first: {
+			// 	exchange: binance
+			// 	symbol: BTCUSDT
+			//  indexTradeData: Index in the Trade Data Array
+			// 	trade: buy
+			// 	time: time
+			// 	buyAsset: BTC
+			// 	sellAsset: USDT
+			// 	buyPrice: BTC/USDT Price
+			// 	buyQuantity: quantity of buyAsset bought
+			// 	sellQuantity: quantity of sellAsset sold
+			// },
+			// second: {
+			// 	exchange: binance
+			// 	symbol: BTCUSDT
+			//  indexTradeData: Index in the Trade Data Array
+			// 	trade: buy
+			// 	time: time
+			// 	buyAsset: BTC
+			// 	sellAsset: USDT
+			// 	buyPrice: BTC/USDT Price
+			// 	buyQuantity: quantity of buyAsset bought
+			// 	sellQuantity: quantity of sellAsset sold
+			// },
+			// third: {
+			// 	exchange: binance
+			// 	symbol: BTCUSDT
+			//  indexTradeData: Index in the Trade Data Array
+			// 	trade: buy
+			// 	time: time
+			// 	buyAsset: BTC
+			// 	sellAsset: USDT
+			// 	buyPrice: BTC/USDT Price
+			// 	buyQuantity: quantity of buyAsset bought
+			// 	sellQuantity: quantity of sellAsset sold
+			// },
+		// }
+		// exchange_first: exchangeName,
+		// time_first: exchangeNameTime,
+		// time_second: 
+	// }
+}
 
