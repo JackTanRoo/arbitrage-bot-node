@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -19,6 +19,14 @@
     
     <link href="./public/docs/assets/css/toolkit-inverse.css" rel="stylesheet">
     <link href="./public/docs/assets/css/application.css" rel="stylesheet">
+
+    <!-- AngularJS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular-resource.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular-route.min.js"></script>
+
+
+
 
 
 
@@ -45,7 +53,7 @@
   </head>
 
 
-<body class="with-top-navbar">
+<body class="with-top-navbar" ng-app="arbitrage-bot">
 
   <nav class="navbar navbar-expand-sm fixed-top navbar-dark bg-dark app-navbar">
       <a class="navbar-brand" href="../index.html">
@@ -64,7 +72,7 @@
 </div>
 <br>
 <!-- <div class="container"> -->
-  <div class="row">
+  <div class="row" ng-controller="recommenderController">
 
 <!-- left side opportunity view  -->
     <div class="col-4">
@@ -72,9 +80,9 @@
         <h3 class="hr-divider-content hr-divider-heading">Recommended Opportunities</h3>
       </div>
       <br>
-      <div class="statcard statcard-success p-4 mb-2">
+      <div class="statcard statcard-success p-4 mb-2" >
         <h3 class="statcard-number">
-          3.1% return
+          {{ arbitrage["15105104313"].ROI }}%
           <small class="delta-indicator">A few seconds ago</small>
         </h3>
         <span class="statcard-desc"> Trade BTC, USDT and LTC at Binance & Coinjar</span>
@@ -183,7 +191,7 @@
       <br>
       <div class="row">
           <div class="input-group">
-            <input type="text" class="form-control" id="amount-invested" placeholder="100 USDT invested" style="border: 1px solid #4195fc">
+            <input type="text" class="form-control" id="amount-invested" placeholder="100 USDT invested" style="border: 1px solid #4195fc" ng-model="arbitrage.opportunities[15105104313].ROI">
             <input type="text" class="form-control" id="Transaction-Fee" placeholder="0.5%  fees & slippage" style="border: 1px solid #4195fc">
             <div class="input-group-append">
               <button class="btn btn-outline-secondary" type="button" style="border: 1px solid #4195fc">Update</button>
