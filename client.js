@@ -10,21 +10,44 @@
 	// Start a recommendations pane
 
     app.controller("recommenderController", function($scope){
-    	
+    	$scope.hello = {
+    		what: "is up"
+    	}
+
+    	var calculateTime = function(currentTime, tradeTime) {
+    		if ((currentTime - tradeTime) > 60000 && (currentTime - tradeTime) < 60*60*1000) {
+    			var minute = Math.round(((currentTime - tradeTime) / 60000), 0);
+
+    			console.log(minute, "minute")
+
+    			return minute.toString() + " mins ago";
+
+    		} else if ((currentTime - tradeTime) > 60*60*1000) {
+    			
+    			var hours = Math.round(((currentTime - tradeTime) / (60 * 60 * 1000)), 0);
+    			return hours.toString() + " hrs ago";
+
+    		} else {
+    			return "A few seconds ago"
+    		}
+    	}
+
     	$scope.arbitrage = {
-	 		"15105104313" : {
+    		hello: "world",
+	 		UUID : {
 				selected: true, 
 				trade_id: 1,
 				type_of_trade: "twoWay",
-				time_of_trade: 15105104313,
-				ROI_of_trade: 0.03,
+				time_of_trade: 1556173353463,
+				display_time: calculateTime(Date.now(), 1556173353463),
+				ROI: 0.03,
 				trades: {
 					first: {
 						exchange: "binance",
 						symbol: "BTCUSDT",
 						indexTradeData: 0,
 						trade: "buy",
-						time: 15105104313,
+						time: 1556173353463,
 						buy: {
 							asset: "BTC",
 							price: 5000,
@@ -41,7 +64,7 @@
 						symbol: "BTCUSDT",
 						indexTradeData: 0,
 						trade: "buy",
-						time: 15105104313,
+						time: 1556173353463,
 						buy: {
 							asset: "BTC",
 							price: 5000,
@@ -58,7 +81,7 @@
 						symbol: "BTCUSDT",
 						indexTradeData: 0,
 						trade: "buy",
-						time: 15105104313,
+						time: 1556173353463,
 						buy: {
 							asset: "BTC",
 							price: 5000,
