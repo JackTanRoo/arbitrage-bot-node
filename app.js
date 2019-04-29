@@ -252,29 +252,33 @@ var app = express();
 
 //init Express Router
 var router = express.Router();
-var port = process.env.PORT || 3000;
+var port = 3000;
 
 //return static page with websocket client
 
 app.use(express.static('./'))
 
 app.get('/', function(req, res) {
+	console.log("in request", req.url)
     res.sendFile(path.join(__dirname + '/index.html'));
 });
 
-var server = app.listen(port, function () {
-    console.log('node.js static server listening on port: ' + port + ", with websockets listener")
-});
+var server = app.listen(port);
  
 
 
 // START SERVER AND WEBSOCKET TO RETURN DATA TO FRONT END
-
+console.log("I am server", server.url)
 const wss = new WebSocket.Server({ server });
 
-wss.on('connection', function connection(clientsocket) {
-	console.log("Arbiter client connected", clientsocket);
+wss.on('open', function open() {
+  console.log("oepned");
+  wss.send('opened, something');
 });
+
+// wss.on('message', function incoming(data) {
+//   console.log(data);
+// });
 
 
 //  GET DATA FROM COINJAR
@@ -287,48 +291,48 @@ wss.on('connection', function connection(clientsocket) {
 	// {"topic":"ticker:LTCAUD","ref":null,"payload":{"volume":"181.00000000","transition_time":"2019-04-04T07:50:00Z","status":"continuous","session":11800,"prev_close":"117.80000000","last":"122.30000000","current_time":"2019-04-04T05:59:11.670951Z","bid":"116.40000000","ask":"122.10000000"},"event":"update"}
 
 
-var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
+// var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
 
-coinjarWss.on("open", function connection(socket){
-	console.log("Server connected to coinjar")	
+// coinjarWss.on("open", function connection(socket){
+// 	console.log("Server connected to coinjar")	
 
-	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSDT"]);
-	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]);
-	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECBTC"]);
+// 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSDT"]);
+// 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]);
+// 	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECBTC"]);
 
-	// set heartbeat every 40 seconds - coinjar requires every 45 seconds
-	setInterval(function(){
-		coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"], function(error){
-			console.log(error)
-		});
-		// console.log("sending heart beat!")
-	}, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
-
-
-	// subscribe to coinjar token channel
-	// coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSD"]);
-	// coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECUSD"]);
+// 	// set heartbeat every 40 seconds - coinjar requires every 45 seconds
+// 	setInterval(function(){
+// 		coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"], function(error){
+// 			console.log(error)
+// 		});
+// 		// console.log("sending heart beat!")
+// 	}, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
 
 
-	// get message from coinjar Socket
+// 	// subscribe to coinjar token channel
+// 	// coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSD"]);
+// 	// coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECUSD"]);
 
-	coinjarWss.on('message', function incoming(message) {
+
+// 	// get message from coinjar Socket
+
+// 	coinjarWss.on('message', function incoming(message) {
 		
-		coinjarDataObj = JSON.parse(message);
-		coinjarData = coinjarDataObj["payload"];
+// 		coinjarDataObj = JSON.parse(message);
+// 		coinjarData = coinjarDataObj["payload"];
 		
-		if (coinjarDataObj["topic"] !== "phoenix") {
-			if (coinjarDataObj["event"] == "init") {
-				for (var i = 0; i < coinjarDataObj.payload.trades.length; i ++){					
-					context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[i])
-				}
-			} else if (coinjarDataObj["event"] == "new") {
-				console.log("IAM DATA OBJ", coinjarDataObj.payload.trades[0])
-				context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[0])
-			}
-		}
-	});
-});
+// 		if (coinjarDataObj["topic"] !== "phoenix") {
+// 			if (coinjarDataObj["event"] == "init") {
+// 				for (var i = 0; i < coinjarDataObj.payload.trades.length; i ++){					
+// 					context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[i])
+// 				}
+// 			} else if (coinjarDataObj["event"] == "new") {
+// 				console.log("IAM DATA OBJ", coinjarDataObj.payload.trades[0])
+// 				context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[0])
+// 			}
+// 		}
+// 	});
+// });
 
 // GET DATA FROM BINANCE
 
@@ -347,44 +351,44 @@ coinjarWss.on("open", function connection(socket){
 //   M: true 
 // }
 
-setTimeout(function(){
+// setTimeout(function(){
 
 
 
-binance.websockets.trades([
-	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["BTCUSDT"],
-	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["ZECBTC"],
-	context["crypto_exchange_parameters"]["binance"]["channel_sub"]["LTCUSDT"]
+// 	binance.websockets.trades([
+// 		context["crypto_exchange_parameters"]["binance"]["channel_sub"]["BTCUSDT"],
+// 		context["crypto_exchange_parameters"]["binance"]["channel_sub"]["ZECBTC"],
+// 		context["crypto_exchange_parameters"]["binance"]["channel_sub"]["LTCUSDT"]
 
-	], (trades) => {
+// 		], (trades) => {
 
-		let {e:eventType, E:eventTime, s:symbol, p:price, q:quantity, m:maker, a:tradeId} = trades;
-		context.trading_data = updateTradingLog(context.trading_data, "binance", trades.s, trades);
-		
-		var coinJarOppositePair = context.twoWayLookup[trades.s];
-		var lastTrade = context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1]
+// 			let {e:eventType, E:eventTime, s:symbol, p:price, q:quantity, m:maker, a:tradeId} = trades;
+// 			context.trading_data = updateTradingLog(context.trading_data, "binance", trades.s, trades);
+			
+// 			var coinJarOppositePair = context.twoWayLookup[trades.s];
+// 			var lastTrade = context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1]
 
-		if (isTwoWayArbitrage(1, 
-			context.trading_data.binance[trades.s]
-			[context.trading_data.binance[trades.s].length-1], 
-			context.trading_data.coinjar[coinJarOppositePair]
-			[context.trading_data.coinjar[coinJarOppositePair]
-			.length-1]).profitable)
-		{
-			context.arbitrage_opportunities.allOpportunities[lastTrade.time] = 
-				isTwoWayArbitrage(1, 
-				context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1], 
-				context.trading_data.coinjar[coinJarOppositePair][context.trading_data.coinjar[coinJarOppositePair].length-1])
+// 			if (isTwoWayArbitrage(1, 
+// 				context.trading_data.binance[trades.s]
+// 				[context.trading_data.binance[trades.s].length-1], 
+// 				context.trading_data.coinjar[coinJarOppositePair]
+// 				[context.trading_data.coinjar[coinJarOppositePair]
+// 				.length-1]).profitable)
+// 			{
+// 				context.arbitrage_opportunities.allOpportunities[lastTrade.time] = 
+// 					isTwoWayArbitrage(1, 
+// 					context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1], 
+// 					context.trading_data.coinjar[coinJarOppositePair][context.trading_data.coinjar[coinJarOppositePair].length-1])
 
-			console.log("there is a profitable trade", context.arbitrage_opportunities)
-		}
+// 				console.log("there is a profitable trade", context.arbitrage_opportunities)
+// 			}
 
-		// console.log(context.trading_data)
-	  // console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", maker: "+maker);
+// 			// console.log(context.trading_data)
+// 		  // console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", maker: "+maker);
 
 
-})}, 
-20000);
+// 	})}, 
+// 20000);
 
 // GET DATA FROM FOREXT
 

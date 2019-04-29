@@ -5,101 +5,119 @@
   //do work
 
 
-    var app = angular.module('arbitrage-bot',["ngRoute", "ngResource"]);
+var app = angular.module('arbitrage-bot',["ngWebsocket"]);
 
-	// Start a recommendations pane
+// Start a recommendations pane
 
-    app.controller("recommenderController", function($scope){
-    	$scope.hello = {
-    		what: "is up"
-    	}
+app.run(function($websocket){
+	console.log("I am in run")
+	var ws = $websocket.$new({
+		url: 'ws://localhost:3000'
+	});
 
-    	var calculateTime = function(currentTime, tradeTime) {
-    		if ((currentTime - tradeTime) > 60000 && (currentTime - tradeTime) < 60*60*1000) {
-    			var minute = Math.round(((currentTime - tradeTime) / 60000), 0);
+	ws.$on('$open', function () {
+	    ws.$emit('hello'); // it sends the event 'hello' with data 'world'
+	})
 
-    			console.log(minute, "minute")
+	ws.$on('$message', function (message) { // it listents for 'incoming event'
+	    console.log('something incoming from the server: ' + message);
+	});
 
-    			return minute.toString() + " mins ago";
+})
 
-    		} else if ((currentTime - tradeTime) > 60*60*1000) {
-    			
-    			var hours = Math.round(((currentTime - tradeTime) / (60 * 60 * 1000)), 0);
-    			return hours.toString() + " hrs ago";
+app.controller("recommenderController", function($scope){
+	$scope.hello = {
+		what: "is up"
+	}
 
-    		} else {
-    			return "A few seconds ago"
-    		}
-    	}
+	var calculateTime = function(currentTime, tradeTime) {
+		if ((currentTime - tradeTime) > 60000 && (currentTime - tradeTime) < 60*60*1000) {
+			var minute = Math.round(((currentTime - tradeTime) / 60000), 0);
 
-    	$scope.arbitrage = {
-    		hello: "world",
-	 		UUID : {
-				selected: true, 
-				trade_id: 1,
-				type_of_trade: "twoWay",
-				time_of_trade: 1556173353463,
-				display_time: calculateTime(Date.now(), 1556173353463),
-				ROI: 0.03,
-				trades: {
-					first: {
-						exchange: "binance",
-						symbol: "BTCUSDT",
-						indexTradeData: 0,
-						trade: "buy",
-						time: 1556173353463,
-						buy: {
-							asset: "BTC",
-							price: 5000,
-							quantity: 1,
-						},
-						sell: {
-							asset: "USDT",
-							price: 1/5000,
-							quantity: 5000 * 1,
-						}
+			console.log(minute, "minute")
+
+			return minute.toString() + " mins ago";
+
+		} else if ((currentTime - tradeTime) > 60*60*1000) {
+			
+			var hours = Math.round(((currentTime - tradeTime) / (60 * 60 * 1000)), 0);
+			return hours.toString() + " hrs ago";
+
+		} else {
+			return "A few seconds ago"
+		}
+	}
+
+	
+
+	$scope.arbitrage = {
+		hello: "world",
+ 		UUID : {
+			selected: true, 
+			trade_id: 1,
+			type_of_trade: "twoWay",
+			time_of_trade: 1556173353463,
+			display_time: calculateTime(Date.now(), 1556173353463),
+			ROI: 0.03,
+			trades: {
+				first: {
+					exchange: "binance",
+					symbol: "BTCUSDT",
+					indexTradeData: 0,
+					trade: "buy",
+					time: 1556173353463,
+					buy: {
+						asset: "BTC",
+						price: 5000,
+						quantity: 1,
 					},
-					second: {
-						exchange: "binance",
-						symbol: "BTCUSDT",
-						indexTradeData: 0,
-						trade: "buy",
-						time: 1556173353463,
-						buy: {
-							asset: "BTC",
-							price: 5000,
-							quantity: 1,
-						},
-						sell: {
-							asset: "USDT",
-							price: 1/5000,
-							quantity: 5000 * 1,
-						}
+					sell: {
+						asset: "USDT",
+						price: 1/5000,
+						quantity: 5000 * 1,
+					}
+				},
+				second: {
+					exchange: "binance",
+					symbol: "BTCUSDT",
+					indexTradeData: 0,
+					trade: "buy",
+					time: 1556173353463,
+					buy: {
+						asset: "BTC",
+						price: 5000,
+						quantity: 1,
 					},
-					third: {
-						exchange: "binance",
-						symbol: "BTCUSDT",
-						indexTradeData: 0,
-						trade: "buy",
-						time: 1556173353463,
-						buy: {
-							asset: "BTC",
-							price: 5000,
-							quantity: 1,
-						},
-						sell: {
-							asset: "USDT",
-							price: 1/5000,
-							quantity: 5000 * 1,
-						}
+					sell: {
+						asset: "USDT",
+						price: 1/5000,
+						quantity: 5000 * 1,
+					}
+				},
+				third: {
+					exchange: "binance",
+					symbol: "BTCUSDT",
+					indexTradeData: 0,
+					trade: "buy",
+					time: 1556173353463,
+					buy: {
+						asset: "BTC",
+						price: 5000,
+						quantity: 1,
+					},
+					sell: {
+						asset: "USDT",
+						price: 1/5000,
+						quantity: 5000 * 1,
 					}
 				}
-			}	
-    	}
+			}
+		}	
+	}
+})
 
 
-
-    })
+// RECOMMENDATION TAB MAKES A WEBSOCKET CALL TO SERVER TO GET LATEST DATA
 
 
 // 15105104313 : {
