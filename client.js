@@ -4,16 +4,15 @@
 // document.addEventListener("DOMContentLoaded", function(e) { 
   //do work
 
+'use strict';
 
 var app = angular.module('arbitrage-bot',["ngWebsocket"]);
 
 // Start a recommendations pane
 
-app.run(function($websocket){
+app.controller("myControl", function($websocket){
 	console.log("I am in run")
-	var ws = $websocket.$new({
-		url: 'ws://localhost:3000'
-	});
+	var ws = $websocket.$new('ws://localhost:3000');
 
 	ws.$on('$open', function () {
 	    ws.$emit('hello'); // it sends the event 'hello' with data 'world'

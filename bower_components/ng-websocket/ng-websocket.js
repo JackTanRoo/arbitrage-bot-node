@@ -119,6 +119,7 @@
         };
 
         me.$$init = function (cfg) {
+            console.log("I am in config", cfg, cfg.url, typeof (cfg.url))
             me.$$ws = cfg.mock ? new $$mockWebsocket(cfg.mock, $http) : new WebSocket(cfg.url, cfg.protocols);
 
             me.$$ws.onmessage = function (message) {
