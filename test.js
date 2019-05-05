@@ -30,8 +30,11 @@ io.on('connection', function(client) {
     
     
     client.on('toBackEnd', function(data) {
-        client.in(data.roomId).emit('message', data);
+    	console.log("in backend", data, "received ")
+        client.in(data.roomId).emit('message', "Server received stuff in toBackend, please display");
     })
+
+    client.emit("message", "hahahaha")
 
 });
 

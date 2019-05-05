@@ -18,6 +18,7 @@ app.service('SocketService', ['socketFactory', function SocketService(socketFact
 }]);
 
 app.controller('homeController', function($scope, localStorageService, SocketService) {
+	console.log("I am in homeController")
 
     $scope.array = [];
     $scope.message = {};
@@ -29,8 +30,13 @@ app.controller('homeController', function($scope, localStorageService, SocketSer
     }
 
     SocketService.on('message', function(msg) {
+        
+    	console.log("got message from server", msg)
+
         $scope.array.push(msg)
     });
+
+    SocketService.emit('toBackEnd', {roomId:'temp', data: "hellowwwwwww from client", date: new Date() })
 
 })
 
