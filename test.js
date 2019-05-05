@@ -29,12 +29,22 @@ var server = app.listen(port, function () {
 
 const wss = new WebSocket.Server({ server });
 
-wss.on('connection', ws => {
-  ws.on('message', message => {
-    console.log(`Received message => ${message}`)
-  })
-  ws.send('Hello! Message From Server!!')
-})
+// wss.on('connection', ws => {
+// 	console.log("connected!")
+//   ws.on('message', message => {
+//     console.log(`Received message => ${message}`)
+//   })
+//   ws.on("error", function(err){
+//   	console.error("error", err)
+//   })
+//   ws.send('Hello! Message From Server!!')
+// })
+
+wss.on('open', function open() {
+  console.log("oepned");
+  wss.send('opened, something');
+});
+
 
 // var ccxt = require("ccxt");
 

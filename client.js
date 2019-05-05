@@ -15,6 +15,7 @@ app.controller("myControl", function($websocket){
 	var ws = $websocket.$new('ws://localhost:3000');
 
 	ws.$on('$open', function () {
+		console.log("CONNECTED!")
 	    ws.$emit('hello'); // it sends the event 'hello' with data 'world'
 	})
 
