@@ -6,24 +6,71 @@
 
 'use strict';
 
-var app = angular.module('arbitrage-bot',["ngWebsocket"]);
+// var app = angular.module('MySocektApp', ['ngMaterial', 'LocalStorageModule', 'btford.socket-io']);
+
+var app = angular.module('arbitrage-bot',['ngMaterial', 'LocalStorageModule', 'btford.socket-io']);
+
+
+app.service('SocketService', ['socketFactory', function SocketService(socketFactory) {
+    return socketFactory({
+        ioSocket: io.connect('http://localhost:3000')
+    });
+}]);
+
+app.controller('homeController', function($scope, localStorageService, SocketService) {
+
+    $scope.array = [];
+    $scope.message = {};
+    SocketService.emit('room', { roomId: "temp" });
+
+    $scope.add = function() {
+        SocketService.emit('toBackEnd', {roomId:'temp', data: $scope.message, date: new Date() })
+        $scope.array.push({ data: $scope.message, date: new Date() })
+    }
+
+    SocketService.on('message', function(msg) {
+        $scope.array.push(msg)
+    });
+
+})
+
 
 // Start a recommendations pane
 
 app.controller("myControl", function($websocket){
-	console.log("I am in run")
-	var ws = $websocket.$new('ws://localhost:3000');
+	// console.log("I am in run")
 
-	ws.$on('$open', function () {
-		console.log("CONNECTED!")
-	    ws.$emit('hello'); // it sends the event 'hello' with data 'world'
-	})
+	var ws = new WebSocket('ws://localhost:3000')
 
-	ws.$on('$message', function (message) { // it listents for 'incoming event'
-	    console.log('something incoming from the server: ' + message);
-	});
+	ws.onopen = function(){  
+        console.log("Socket has been opened!");  
+        ws.send("heloooos")
+    };
+
+    ws.onmessage = function(message) {
+    	console.log("got message", message)
+        console.log(JSON.parse(message.data));
+    };
+
+     ws.onerror = function(err){
+     	console.log("error on client side")
+        console.log(err)
+    };
+	// var ws = $websocket.$new('ws://localhost:3000');
+
+	// ws.$on('$open', function () {
+	// 	console.log("CONNECTED!")
+	//     ws.$emit('message', "data is here"); // it sends the event 'hello' with data 'world'
+	// })
+
+	// ws.$on('message', function (message) { // it listents for 'incoming event'
+	//     console.log('something incoming from the server: ' + message);
+	// });
 
 })
+
+
+
 
 app.controller("recommenderController", function($scope){
 	$scope.hello = {

@@ -277,20 +277,20 @@ const wss = new WebSocket.Server({ server });
 // });
 
 wss.on('connection', ws => {
+	
 	console.log("CONNECTED TO CLIENT!")
+	  ws.send('Hello! Message From Server!!')
+
   ws.on('message', message => {
     console.log(`Received message => ${message}`)
+    ws.send("here is the reply")
   })
+
   ws.on("error", function(err){
   	console.error("error", err)
   })
-  ws.send('Hello! Message From Server!!')
+
 })
-
-wss.on('message', function incoming(data) {
-  console.log(data);
-});
-
 
 //  GET DATA FROM COINJAR
 
