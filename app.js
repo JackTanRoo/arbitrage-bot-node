@@ -278,16 +278,18 @@ var context = {
 
 
 var app = express();
+// var app2 = express();
 
 //init Express Router
 var router = express.Router();
-var port = process.env.PORT || 3000;
+var port = 3000;
+// var port2 = 3000;
 
 //return static page with websocket client
 
 
 app.get('/', function(req, res) {
-    res.sendFile(path.join(__dirname + '/index.html'));
+    res.sendFile(path.join(__dirname + '/index-backup.html'));
 });
 
 app.use(express.static('./'))
@@ -297,9 +299,6 @@ app.use(express.static('./'))
 // })
 
 var server = require('http').createServer(app);
-
-
-const wss = new WebSocket.Server({ server });
 
 
 var io = require('socket.io')(server);
@@ -315,7 +314,6 @@ io.on('connection', function(client) {
     client.on('room', function(data) {
         client.join(data.roomId);
         console.log(' Client joined the room and client id is '+ client.id);
-
     });
     
     
@@ -332,6 +330,7 @@ server.listen(port, function () {
     console.log('node.js static server listening on port: ' + port + ", WHAT IS LOVE with websockets listener")
 });
 
+// const wss = new WebSocket.Server({ server });
 
 
 // wss.on('connection', ws => {
