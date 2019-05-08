@@ -26,6 +26,8 @@ const axios = require('axios');
 var moment = require("moment");
 
 
+var app = express();
+
 // console.log("ccxt")
 // init context of params
 
@@ -83,14 +85,51 @@ var port = process.env.PORT || 3000;
 app.use(express.static('./'))
 
 app.get('/', function(req, res) {
-    res.sendFile(path.join(__dirname + '/index.html'));
+    res.sendFile(path.join(__dirname + '/index-backup.html'));
 });
 
-var server = app.listen(port, function () {
-    console.log('node.js static server listening on port: ' + port + ", with websockets listener")
-})
+// var server = app.listen(port, function () {
+//     console.log('node.js static server listening on port: ' + port + ", with websockets listener")
+// })
+
+var server = require('http').createServer(app);
+
 
 const wss = new WebSocket.Server({ server });
+
+
+app.use(express.static('./'))
+
+var io = require('socket.io')(server);
+
+
+io.on('connection', function(client) {
+
+    client.on('disconnect', function() {
+	    console.log("disconnected")
+    });
+
+
+    client.on('room', function(data) {
+        client.join(data.roomId);
+        console.log(' Client joined the room and client id is '+ client.id);
+
+    });
+    
+    
+    client.on('toBackEnd', function(data) {
+    	console.log("in backend", data, "received ")
+        client.in(data.roomId).emit('message', "Server received stuff in toBackend, please display");
+    })
+
+    client.emit("message", "hahahaha")
+
+});
+
+server.listen(port, function () {
+    console.log('node.js static server listening on port: ' + port + ", fdafdafaw with websockets listener")
+});
+
 
 // const server = new WebSocket.Server({ server: app.listen(3000) });
  

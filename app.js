@@ -248,49 +248,107 @@ var context = {
 
 //  START SERVER
 
-var app = express();
+// var app = express();
 
-//init Express Router
-var router = express.Router();
-var port = 3000;
+// //init Express Router
+// var router = express.Router();
+// var port = 3000;
 
 //return static page with websocket client
 
-app.use(express.static('./'))
+// app.use(express.static('./'))
 
-app.get('/', function(req, res) {
-	console.log("in request", req.url)
-    res.sendFile(path.join(__dirname + '/index.html'));
-});
+// app.get('/', function(req, res) {
+// 	console.log("in request", req.url)
+//     res.sendFile(path.join(__dirname + '/index.html'));
+// });
 
-var server = app.listen(port);
+// var server = app.listen(port);
  
 
 
 // START SERVER AND WEBSOCKET TO RETURN DATA TO FRONT END
 // console.log("I am server", server)
-const wss = new WebSocket.Server({ server });
+// const wss = new WebSocket.Server({ server });
 
 // wss.on('open', function open() {
 //   console.log("OPENED");
 //   wss.send('opened, something');
 // });
 
-wss.on('connection', ws => {
+
+var app = express();
+
+//init Express Router
+var router = express.Router();
+var port = process.env.PORT || 3000;
+
+//return static page with websocket client
+
+
+app.get('/', function(req, res) {
+    res.sendFile(path.join(__dirname + '/index.html'));
+});
+
+app.use(express.static('./'))
+
+// var server = app.listen(port, function () {
+//     console.log('node.js static server listening on port: ' + port + ", with websockets listener")
+// })
+
+var server = require('http').createServer(app);
+
+
+const wss = new WebSocket.Server({ server });
+
+
+var io = require('socket.io')(server);
+
+
+io.on('connection', function(client) {
+
+    client.on('disconnect', function() {
+	    console.log("disconnected")
+    });
+
+
+    client.on('room', function(data) {
+        client.join(data.roomId);
+        console.log(' Client joined the room and client id is '+ client.id);
+
+    });
+    
+    
+    client.on('toBackEnd', function(data) {
+    	console.log("in backend", data, "received ")
+        client.in(data.roomId).emit('message', "Server received stuff in toBackend, please display");
+    })
+
+    client.emit("message", "hahahaha")
+
+});
+
+server.listen(port, function () {
+    console.log('node.js static server listening on port: ' + port + ", WHAT IS LOVE with websockets listener")
+});
+
+
+
+// wss.on('connection', ws => {
 	
-	console.log("CONNECTED TO CLIENT!")
-	  ws.send('Hello! Message From Server!!')
+// 	console.log("CONNECTED TO CLIENT!")
+// 	  ws.send('Hello! Message From Server!!')
 
-  ws.on('message', message => {
-    console.log(`Received message => ${message}`)
-    ws.send("here is the reply")
-  })
+//   ws.on('message', message => {
+//     console.log(`Received message => ${message}`)
+//     ws.send("here is the reply")
+//   })
 
-  ws.on("error", function(err){
-  	console.error("error", err)
-  })
+//   ws.on("error", function(err){
+//   	console.error("error", err)
+//   })
 
-})
+// })
 
 //  GET DATA FROM COINJAR
 
@@ -313,8 +371,9 @@ coinjarWss.on("open", function connection(socket){
 
 	// set heartbeat every 40 seconds - coinjar requires every 45 seconds
 	setInterval(function(){
+		console.log("trying to send a heartbeat")
 		coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"], function(error){
-			console.log(error)
+			console.log("received error", error)
 		});
 		// console.log("sending heart beat!")
 	}, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
@@ -328,7 +387,7 @@ coinjarWss.on("open", function connection(socket){
 	// get message from coinjar Socket
 
 	coinjarWss.on('message', function incoming(message) {
-		
+		console.log("received message", message)
 		coinjarDataObj = JSON.parse(message);
 		coinjarData = coinjarDataObj["payload"];
 		
@@ -364,7 +423,7 @@ coinjarWss.on("open", function connection(socket){
 
 setTimeout(function(){
 
-
+	console.log("trying to send binance heartbeat")
 
 	binance.websockets.trades([
 		context["crypto_exchange_parameters"]["binance"]["channel_sub"]["BTCUSDT"],
