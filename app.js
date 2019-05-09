@@ -322,6 +322,11 @@ io.on('connection', function(client) {
         client.in(data.roomId).emit('message', "Server received stuff in toBackend, please display");
     })
 
+    client.on('newOpportunities', function(data) {
+    	console.log("newOpportunities", data, "received ")
+        client.in(data.roomId).emit('message', "Server received stuff in toBackend, please displayHAHAHAHA");
+    })
+
     client.emit("message", "hahahaha")
 
 });

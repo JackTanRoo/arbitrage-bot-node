@@ -8,7 +8,7 @@
 
 // var app = angular.module('MySocektApp', ['ngMaterial', 'LocalStorageModule', 'btford.socket-io']);
 
-var app = angular.module('arbitrage-bot',['btford.socket-io']);
+var app = angular.module('arbitrage-bot',['btford.socket-io', "$interval"]);
 
 
 app.service('SocketService', ['socketFactory', function SocketService(socketFactory) {
@@ -17,7 +17,7 @@ app.service('SocketService', ['socketFactory', function SocketService(socketFact
     });
 }]);
 
-app.controller('homeController', function($scope, SocketService) {
+app.controller('homeController', function($scope, SocketService, $interval) {
 	console.log("I am in homeController", $scope.hello)
 
     $scope.array = [];
@@ -32,9 +32,19 @@ app.controller('homeController', function($scope, SocketService) {
     SocketService.on('message', function(msg) {
         
     	console.log("got message from server", msg)
-
-        $scope.array.push(msg)
+        // $scope.array.push(msg)
+        
     });
+
+    $interval(function(){
+
+    	SocketService.emit('newOpportunities', {
+    		roomId:'temp', 
+    		data: "hellowwwwwww from client", 
+    		date: new Date() 
+    	});
+
+    }, 3000)
 
     SocketService.emit('toBackEnd', {roomId:'temp', data: "hellowwwwwww from client", date: new Date() })
 
