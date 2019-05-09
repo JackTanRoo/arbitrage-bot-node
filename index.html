@@ -26,10 +26,16 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular-route.min.js"></script>
     <script src="bower_components/ng-websocket/ng-websocket.js"></script>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>    
+    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+    <script src="bower_components/angular-local-storage/dist/angular-local-storage.min.js"></script>
+    <script src="bower_components/socket.io-client/dist/socket.io.js"></script>
 
 
-
-
+    <!-- <script src="http://localhost:3000/socket.io/socket.io.js"></script> -->
+    <script src="bower_components/angular-socket-io/socket.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
 
 
     <!-- Bootstrap CSS -->
@@ -54,9 +60,8 @@
     </style>
   </head>
 
-
 <body class="with-top-navbar" ng-app="arbitrage-bot">
-
+<div ng-include="'view/home.html'"></div>
   <nav class="navbar navbar-expand-sm fixed-top navbar-dark bg-dark app-navbar">
       <a class="navbar-brand" href="../index.html">
         <span class="icon icon-leaf navbar-brand-icon"></span>
@@ -74,8 +79,10 @@
 </div>
 <br>
 <!-- <div class="container"> -->
-  <div class="row" ng-controller="recommenderController">
+  <div class="row" ng-controller="homeController">
 
+  <div class="row" ng-controller="recommenderController">
+    <div ng-controller="homeController"></div>
 <!-- left side opportunity view  -->
     <div class="col-4" ng-controller="myControl">
       <div class="hr-divider mt-3 mb-5">

@@ -8,7 +8,7 @@
 
 // var app = angular.module('MySocektApp', ['ngMaterial', 'LocalStorageModule', 'btford.socket-io']);
 
-var app = angular.module('arbitrage-bot',['ngMaterial', 'LocalStorageModule', 'btford.socket-io']);
+var app = angular.module('arbitrage-bot',['btford.socket-io']);
 
 
 app.service('SocketService', ['socketFactory', function SocketService(socketFactory) {
@@ -17,7 +17,7 @@ app.service('SocketService', ['socketFactory', function SocketService(socketFact
     });
 }]);
 
-app.controller('homeController', function($scope, localStorageService, SocketService) {
+app.controller('homeController', function($scope, SocketService) {
 	console.log("I am in homeController")
 
     $scope.array = [];
