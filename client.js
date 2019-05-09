@@ -18,7 +18,7 @@ app.service('SocketService', ['socketFactory', function SocketService(socketFact
 }]);
 
 app.controller('homeController', function($scope, SocketService) {
-	console.log("I am in homeController")
+	console.log("I am in homeController", $scope.hello)
 
     $scope.array = [];
     $scope.message = {};
@@ -38,42 +38,42 @@ app.controller('homeController', function($scope, SocketService) {
 
     SocketService.emit('toBackEnd', {roomId:'temp', data: "hellowwwwwww from client", date: new Date() })
 
-})
+});
 
 
 // Start a recommendations pane
 
-app.controller("myControl", function($websocket){
-	// console.log("I am in run")
+// app.controller("myControl", function($websocket){
+// 	// console.log("I am in run")
 
-	// var ws = new WebSocket('ws://localhost:3000')
+// 	// var ws = new WebSocket('ws://localhost:3000')
 
-	// ws.onopen = function(){  
- //        console.log("Socket has been opened!");  
- //        ws.send("heloooos")
- //    };
+// 	// ws.onopen = function(){  
+//  //        console.log("Socket has been opened!");  
+//  //        ws.send("heloooos")
+//  //    };
 
- //    ws.onmessage = function(message) {
- //    	console.log("got message", message)
- //        console.log(JSON.parse(message.data));
- //    };
+//  //    ws.onmessage = function(message) {
+//  //    	console.log("got message", message)
+//  //        console.log(JSON.parse(message.data));
+//  //    };
 
- //     ws.onerror = function(err){
- //     	console.log("error on client side")
- //        console.log(err)
- //    };
-	// var ws = $websocket.$new('ws://localhost:3000');
+//  //     ws.onerror = function(err){
+//  //     	console.log("error on client side")
+//  //        console.log(err)
+//  //    };
+// 	// var ws = $websocket.$new('ws://localhost:3000');
 
-	// ws.$on('$open', function () {
-	// 	console.log("CONNECTED!")
-	//     ws.$emit('message', "data is here"); // it sends the event 'hello' with data 'world'
-	// })
+// 	// ws.$on('$open', function () {
+// 	// 	console.log("CONNECTED!")
+// 	//     ws.$emit('message', "data is here"); // it sends the event 'hello' with data 'world'
+// 	// })
 
-	// ws.$on('message', function (message) { // it listents for 'incoming event'
-	//     console.log('something incoming from the server: ' + message);
-	// });
+// 	// ws.$on('message', function (message) { // it listents for 'incoming event'
+// 	//     console.log('something incoming from the server: ' + message);
+// 	// });
 
-})
+// })
 
 
 
