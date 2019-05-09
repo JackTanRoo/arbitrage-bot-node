@@ -134,16 +134,16 @@ var context = {
 		LTCAUD : "LTCUSDT",			
 	},
 	"arbitrage_opportunities":{
-		selected : {
+		selected : []
 			// 150230214310 : {
 
 			// }
-		},
-		allOpportunities : {
+		,
+		allOpportunities : []
 			// 12325315314 : {
 
 			// }
-		}
+		
 		// selected : {
 		// 	// trade_id: belo
 		// },
@@ -323,8 +323,26 @@ io.on('connection', function(client) {
     })
 
     client.on('newOpportunities', function(data) {
-    	console.log("newOpportunities", data, "received ")
-        client.emit('message', "Server received stuff in toBackend, please displayHAHAHAHA");
+    	
+    	var lastTrades = [];
+
+    	var len = context["arbitrage_opportunities"].allOpportunities.length;
+
+    	if ( len >= 3) {
+
+    		lastTrades = [
+	    		context["arbitrage_opportunities"].allOpportunities[len-1],
+	    		context["arbitrage_opportunities"].allOpportunities[len-2],
+	    		context["arbitrage_opportunities"].allOpportunities[len-3]
+	    	]
+    	
+    	}
+    	
+    	console.log("newOpportunities", lastTrades)
+
+        client.emit('message', 
+        	JSON.stringify(lastTrades)
+        );
     })
 
     client.emit("message", "hahahaha")
@@ -449,10 +467,10 @@ setTimeout(function(){
 				[context.trading_data.coinjar[coinJarOppositePair]
 				.length-1]).profitable)
 			{
-				context.arbitrage_opportunities.allOpportunities[lastTrade.time] = 
+				context.arbitrage_opportunities.allOpportunities.push( 
 					isTwoWayArbitrage(1, 
 					context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1], 
-					context.trading_data.coinjar[coinJarOppositePair][context.trading_data.coinjar[coinJarOppositePair].length-1])
+					context.trading_data.coinjar[coinJarOppositePair][context.trading_data.coinjar[coinJarOppositePair].length-1]))
 
 				// console.log("there is a profitable trade", context.arbitrage_opportunities)
 			}
