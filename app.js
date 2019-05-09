@@ -324,7 +324,7 @@ io.on('connection', function(client) {
 
     client.on('newOpportunities', function(data) {
     	console.log("newOpportunities", data, "received ")
-        client.in(data.roomId).emit('message', "Server received stuff in toBackend, please displayHAHAHAHA");
+        client.emit('message', "Server received stuff in toBackend, please displayHAHAHAHA");
     })
 
     client.emit("message", "hahahaha")
@@ -391,7 +391,7 @@ coinjarWss.on("open", function connection(socket){
 	// get message from coinjar Socket
 
 	coinjarWss.on('message', function incoming(message) {
-		console.log("received message", message)
+		// console.log("received message", message)
 		coinjarDataObj = JSON.parse(message);
 		coinjarData = coinjarDataObj["payload"];
 		
@@ -454,7 +454,7 @@ setTimeout(function(){
 					context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1], 
 					context.trading_data.coinjar[coinJarOppositePair][context.trading_data.coinjar[coinJarOppositePair].length-1])
 
-				console.log("there is a profitable trade", context.arbitrage_opportunities)
+				// console.log("there is a profitable trade", context.arbitrage_opportunities)
 			}
 
 			// console.log(context.trading_data)

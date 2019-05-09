@@ -8,7 +8,7 @@
 
 // var app = angular.module('MySocektApp', ['ngMaterial', 'LocalStorageModule', 'btford.socket-io']);
 
-var app = angular.module('arbitrage-bot',['btford.socket-io', "$interval"]);
+var app = angular.module('arbitrage-bot',['btford.socket-io']);
 
 
 app.service('SocketService', ['socketFactory', function SocketService(socketFactory) {
@@ -33,11 +33,11 @@ app.controller('homeController', function($scope, SocketService, $interval) {
         
     	console.log("got message from server", msg)
         // $scope.array.push(msg)
-        
+
     });
 
     $interval(function(){
-
+    	console.log("emitting new opps")
     	SocketService.emit('newOpportunities', {
     		roomId:'temp', 
     		data: "hellowwwwwww from client", 
