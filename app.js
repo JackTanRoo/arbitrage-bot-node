@@ -341,7 +341,10 @@ io.on('connection', function(client) {
     	console.log("newOpportunities", lastTrades)
 
         client.emit('message', 
-        	JSON.stringify(lastTrades)
+        	JSON.stringify({
+        		message: "oppportunities",
+        		trades: lastTrades
+        	})
         );
     })
 

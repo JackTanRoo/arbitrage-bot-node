@@ -8,7 +8,7 @@
 
 // var app = angular.module('MySocektApp', ['ngMaterial', 'LocalStorageModule', 'btford.socket-io']);
 
-var app = angular.module('arbitrage-bot',['btford.socket-io']);
+var app = angular.module('arbitrage-bot',['btford.socket-io', "utilities"]);
 
 
 app.service('SocketService', ['socketFactory', function SocketService(socketFactory) {
@@ -17,7 +17,160 @@ app.service('SocketService', ['socketFactory', function SocketService(socketFact
     });
 }]);
 
-app.controller('homeController', function($scope, SocketService, $interval) {
+// factory to update scope.opportunities elements
+
+app.factory('utilities', function(){
+	var outputObj = {};
+
+	outputObj.calculateTime = function(currentTime, tradeTime) {
+		if ((currentTime - tradeTime) > 60000 && (currentTime - tradeTime) < 60*60*1000) {
+			var minute = Math.round(((currentTime - tradeTime) / 60000), 0);
+
+			console.log(minute, "minute")
+
+			return minute.toString() + " mins ago";
+
+		} else if ((currentTime - tradeTime) > 60*60*1000) {
+			
+			var hours = Math.round(((currentTime - tradeTime) / (60 * 60 * 1000)), 0);
+			return hours.toString() + " hrs ago";
+
+		} else {
+			return "A few seconds ago"
+		}
+	};
+
+	outputObj.updateTime = function(oppsArray){
+		var currentTime;
+		var output = oppsArray;
+
+		for (var i = i; i < oppsArray.length ; i++) {
+
+			currentTime = outputObj.calculateTime(Date.now(), oppsArray[i].time_of_trade)
+			output[i].time_of_trade = currentTime;
+
+		}
+		return output
+	};
+
+	outputObj.updateCardDesc = function (oppsArray){
+
+		var output = oppsArray;
+
+		for (var i = i; i < oppsArray.length; i++ ) {
+
+			if (output[i].type_of_trade == 2){
+				output[i].description = "Trade " + output[i].first.symbol + " & " + output[i].second.symbol + " at " + output[i].first.exchange + " & " + output[i].second.exchange
+				console.log("new description", output[i].description)
+			}
+
+			if (output[i].type_of_trade == 3){
+				output[i].description = "Trade " + output[i].first.symbol + ", " + output[i].second.symbol + " & " + output[i].third.symbol + " at " + output[i].first.exchange + " & " + output[i].second.exchange
+				console.log("new description", output[i].description)
+			}
+		};
+
+		return output;
+	}
+
+    	// array lenght = 3
+    	// [
+    		// {"profitable":true,
+	    		// "trade_id":2,
+	    		// "type_of_trade":2, - refers to if this is a bilateral or trilateral trade
+	    		// "time_of_trade":15000000000,
+	    		// "ROI_of_trade":905605.2206451604,
+	    		// "first":{
+	    				// "exchange":"coinjar",
+	    				// "symbol":"BTCAUD",
+	    				// "indexTradeData":null,
+	    				// "time":15000000000,
+	    				// "buy":{
+	    					// "asset":"BTC",
+	    					// "price":0.8,
+	    					// "quantity":0.6977381403845369
+	    				// },
+    					// "sell":{
+    						// "asset":"AUD",
+    						// "price":1.25,
+    						// "quantity":0.5581905123076295
+    					// }
+    				// },
+	    		// "second":{
+	    				// "exchange":"binance","symbol":"BTCUSDT","indexTradeData":null,"time":1557697621102,
+	    				// "buy":{
+	    					// "asset":"BTC","price":"7123.23000000","quantity":0.6977381403845369},
+	    					// "sell":{"asset":"USDT","price":0.00014038575196926114,"quantity":4970.149253731344}
+    				// }
+				// },
+
+					// $scope.arbitrage = {
+	// 	hello: "world",
+ // 		UUID : {
+	// 		selected: true, 
+	// 		trade_id: 1,
+	// 		type_of_trade: "twoWay",
+	// 		time_of_trade: 1556173353463,
+	// 		display_time: utilities.calculateTime(Date.now(), 1556173353463),
+	// 		ROI: 0.03,
+	// 		trades: {
+	// 			first: {
+	// 				exchange: "binance",
+	// 				symbol: "BTCUSDT",
+	// 				indexTradeData: 0,
+	// 				trade: "buy",
+	// 				time: 1556173353463,
+	// 				buy: {
+	// 					asset: "BTC",
+	// 					price: 5000,
+	// 					quantity: 1,
+	// 				},
+	// 				sell: {
+	// 					asset: "USDT",
+	// 					price: 1/5000,
+	// 					quantity: 5000 * 1,
+	// 				}
+	// 			},
+	// 			second: {
+	// 				exchange: "binance",
+	// 				symbol: "BTCUSDT",
+	// 				indexTradeData: 0,
+	// 				trade: "buy",
+	// 				time: 1556173353463,
+	// 				buy: {
+	// 					asset: "BTC",
+	// 					price: 5000,
+	// 					quantity: 1,
+	// 				},
+	// 				sell: {
+	// 					asset: "USDT",
+	// 					price: 1/5000,
+	// 					quantity: 5000 * 1,
+	// 				}
+	// 			},
+	// 			third: {
+	// 				exchange: "binance",
+	// 				symbol: "BTCUSDT",
+	// 				indexTradeData: 0,
+	// 				trade: "buy",
+	// 				time: 1556173353463,
+	// 				buy: {
+	// 					asset: "BTC",
+	// 					price: 5000,
+	// 					quantity: 1,
+	// 				},
+	// 				sell: {
+	// 					asset: "USDT",
+	// 					price: 1/5000,
+	// 					quantity: 5000 * 1,
+	// 				}
+	// 			}
+	// 		}
+
+
+});
+
+app.controller('homeController', function($scope, SocketService, $interval, utilities) {
 	console.log("I am in homeController", $scope.hello)
 
     $scope.array = [];
@@ -30,9 +183,14 @@ app.controller('homeController', function($scope, SocketService, $interval) {
     }
 
     SocketService.on('message', function(msg) {
-        
-    	console.log("got message from server", msg)
-        // $scope.array.push(msg)
+        var message = JSON.parse(msg);
+
+        if (message.message = "opportunities") {
+        	$scope.trades = message.trades
+        	$scope.trades = utilities.updateTime($scope.trades)
+        	$scope.trades = utilities.updateCardDesc($scope.trades)
+        }
+    	// console.log("got message from server", msg)
 
     });
 
@@ -88,30 +246,10 @@ app.controller('homeController', function($scope, SocketService, $interval) {
 
 
 
-app.controller("recommenderController", function($scope){
+app.controller("recommenderController", function($scope, utilities){
 	$scope.hello = {
 		what: "is up"
 	}
-
-	var calculateTime = function(currentTime, tradeTime) {
-		if ((currentTime - tradeTime) > 60000 && (currentTime - tradeTime) < 60*60*1000) {
-			var minute = Math.round(((currentTime - tradeTime) / 60000), 0);
-
-			console.log(minute, "minute")
-
-			return minute.toString() + " mins ago";
-
-		} else if ((currentTime - tradeTime) > 60*60*1000) {
-			
-			var hours = Math.round(((currentTime - tradeTime) / (60 * 60 * 1000)), 0);
-			return hours.toString() + " hrs ago";
-
-		} else {
-			return "A few seconds ago"
-		}
-	}
-
-	
 
 	$scope.arbitrage = {
 		hello: "world",
@@ -120,7 +258,7 @@ app.controller("recommenderController", function($scope){
 			trade_id: 1,
 			type_of_trade: "twoWay",
 			time_of_trade: 1556173353463,
-			display_time: calculateTime(Date.now(), 1556173353463),
+			display_time: utilities.calculateTime(Date.now(), 1556173353463),
 			ROI: 0.03,
 			trades: {
 				first: {
