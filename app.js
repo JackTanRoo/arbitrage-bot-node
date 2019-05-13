@@ -67,8 +67,8 @@ var context = {
 			[
 				{
 				symbol: "BTCUSDT",
-				time: 15000000000,
-				price: 1,
+				time: Date.now(),
+				price: 7300,
 				quantity: 1,
 				exchange: "binance" 
 				}
@@ -76,8 +76,8 @@ var context = {
 			"ZECBTC" : [
 				{
 				symbol: "ZECBTC",
-				time: 15000000000,
-				price: 1,
+				time: Date.now(),
+				price: 0.009,
 				quantity: 1,
 				exchange: "binance" 
 				}
@@ -85,8 +85,8 @@ var context = {
 			"LTCUSDT" : [
 				{
 				symbol: "LTCUSDT",
-				time: 15000000000,
-				price: 1,
+				time: Date.now(),
+				price: 85,
 				quantity: 1,
 				exchange: "binance" 
 				}
@@ -97,8 +97,8 @@ var context = {
 			[
 				{
 				symbol: "BTCAUD",
-				time: 15000000000,
-				price: 0.8,
+				time: Date.now(),
+				price: 9900,
 				quantity: 1,
 				exchange: "coinjar" 
 				}
@@ -106,8 +106,8 @@ var context = {
 			"ZECBTC" : [
 				{
 				symbol: "ZECBTC",
-				time: 15000000000,
-				price: 0.7,
+				time: Date.now(),
+				price: 0.009,
 				quantity: 1,
 				exchange: "coinjar" 
 				}
@@ -115,8 +115,8 @@ var context = {
 			"LTCAUD" : [
 				{
 				symbol: "LTCAUD",
-				time: 15000000000,
-				price: 0.6,
+				time: Date.now(),
+				price: 121,
 				quantity: 1,
 				exchange: "coinjar" 
 				}
@@ -631,14 +631,14 @@ function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchangeobj2){
     var ROI_buy_exchange2 = (estimated_buy_total_price - estimated_sell_total_price) / estimated_sell_total_price * 100;
 
     if (ROI_buy_exchange1 >=  margin_of_error){
-    	console.log("buy BTC at Exchange 1, sell BTC at Exchange 2, make x ROI return")
+    	console.log("ROI, sell price, buy price", ROI_buy_exchange1, estimated_buy_total_price, estimated_sell_total_price)
     	output = parseArbitrageObj(exchangeobj1, exchangeobj2, ROI_buy_exchange1, units_to_buy);
     } 
 
 	// IF SELLING EXCHANGE 2
     
     else if (ROI_buy_exchange2 >=  margin_of_error){
-    	console.log("buy BTC at Exchange 1, sell BTC at Exchange 2, make x ROI return")
+    	console.log("ROI, sell price, buy price", ROI_buy_exchange2, estimated_sell_total_price, estimated_buy_total_price)
     	output = parseArbitrageObj(exchangeobj2, exchangeobj1, ROI_buy_exchange2, units_to_buy);
     }
 

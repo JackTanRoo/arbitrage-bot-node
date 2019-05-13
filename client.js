@@ -52,6 +52,7 @@ app.factory('utilities', function(){
 			output[i].time_of_trade = currentTime;
 
 		}
+
 		console.log("I am in update time", output)
 		return output
 	};
@@ -73,106 +74,21 @@ app.factory('utilities', function(){
 			}
 		};
 
-		return output;
-	}
+	};
+
+	outputObj.updateROI = function (oppsArray){
+
+		var output = oppsArray;
+		console.log("oppsArra", output)
+
+		for (var i = 0; i < output.length; i++ ) {	
+			output[i].display_ROI = output[i].ROI_of_trade.toFixed(1)
+		};
 	
+		return output;
+	};
+
 	return outputObj;
-
-    	// array lenght = 3
-    	// [
-    		// {"profitable":true,
-	    		// "trade_id":2,
-	    		// "type_of_trade":2, - refers to if this is a bilateral or trilateral trade
-	    		// "time_of_trade":15000000000,
-	    		// "ROI_of_trade":905605.2206451604,
-	    		// "first":{
-	    				// "exchange":"coinjar",
-	    				// "symbol":"BTCAUD",
-	    				// "indexTradeData":null,
-	    				// "time":15000000000,
-	    				// "buy":{
-	    					// "asset":"BTC",
-	    					// "price":0.8,
-	    					// "quantity":0.6977381403845369
-	    				// },
-    					// "sell":{
-    						// "asset":"AUD",
-    						// "price":1.25,
-    						// "quantity":0.5581905123076295
-    					// }
-    				// },
-	    		// "second":{
-	    				// "exchange":"binance","symbol":"BTCUSDT","indexTradeData":null,"time":1557697621102,
-	    				// "buy":{
-	    					// "asset":"BTC","price":"7123.23000000","quantity":0.6977381403845369},
-	    					// "sell":{"asset":"USDT","price":0.00014038575196926114,"quantity":4970.149253731344}
-    				// }
-				// },
-
-					// $scope.arbitrage = {
-	// 	hello: "world",
- // 		UUID : {
-	// 		selected: true, 
-	// 		trade_id: 1,
-	// 		type_of_trade: "twoWay",
-	// 		time_of_trade: 1556173353463,
-	// 		display_time: utilities.calculateTime(Date.now(), 1556173353463),
-	// 		ROI: 0.03,
-	// 		trades: {
-	// 			first: {
-	// 				exchange: "binance",
-	// 				symbol: "BTCUSDT",
-	// 				indexTradeData: 0,
-	// 				trade: "buy",
-	// 				time: 1556173353463,
-	// 				buy: {
-	// 					asset: "BTC",
-	// 					price: 5000,
-	// 					quantity: 1,
-	// 				},
-	// 				sell: {
-	// 					asset: "USDT",
-	// 					price: 1/5000,
-	// 					quantity: 5000 * 1,
-	// 				}
-	// 			},
-	// 			second: {
-	// 				exchange: "binance",
-	// 				symbol: "BTCUSDT",
-	// 				indexTradeData: 0,
-	// 				trade: "buy",
-	// 				time: 1556173353463,
-	// 				buy: {
-	// 					asset: "BTC",
-	// 					price: 5000,
-	// 					quantity: 1,
-	// 				},
-	// 				sell: {
-	// 					asset: "USDT",
-	// 					price: 1/5000,
-	// 					quantity: 5000 * 1,
-	// 				}
-	// 			},
-	// 			third: {
-	// 				exchange: "binance",
-	// 				symbol: "BTCUSDT",
-	// 				indexTradeData: 0,
-	// 				trade: "buy",
-	// 				time: 1556173353463,
-	// 				buy: {
-	// 					asset: "BTC",
-	// 					price: 5000,
-	// 					quantity: 1,
-	// 				},
-	// 				sell: {
-	// 					asset: "USDT",
-	// 					price: 1/5000,
-	// 					quantity: 5000 * 1,
-	// 				}
-	// 			}
-	// 		}
-
-
 });
 
 app.controller('homeController', function($scope, SocketService, $interval, utilities) {
@@ -195,6 +111,7 @@ app.controller('homeController', function($scope, SocketService, $interval, util
         	$scope.trades = message.trades
         	$scope.trades = utilities.updateTime($scope.trades)
         	$scope.trades = utilities.updateCardDesc($scope.trades)
+        	$scope.trades = utilities.updateROI(message.trades)
         }
     	// console.log("got message from server", msg)
 
@@ -208,7 +125,7 @@ app.controller('homeController', function($scope, SocketService, $interval, util
     		date: new Date() 
     	});
 
-    }, 3000)
+    }, 10000)
 
     SocketService.emit('toBackEnd', {roomId:'temp', data: "hellowwwwwww from client", date: new Date() })
 
