@@ -234,7 +234,7 @@ coinjarWss.on("open", function connection(socket){
         }
     });
 
-    // coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSDT"]));
+    coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCAUD"]));
     coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]));
     coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECBTC"]));
 

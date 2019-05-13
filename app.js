@@ -338,7 +338,7 @@ io.on('connection', function(client) {
     	
     	}
     	
-    	console.log("newOpportunities", lastTrades)
+    	// console.log("newOpportunities", lastTrades)
 
         client.emit('message', 
         	JSON.stringify({
@@ -390,9 +390,9 @@ var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"][
 coinjarWss.on("open", function connection(socket){
 	console.log("Server connected to coinjar")	
 
-	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSDT"]);
-	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]);
-	coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECBTC"]);
+    coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCAUD"]);
+    coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]);
+    coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECBTC"]);
 
 	// set heartbeat every 40 seconds - coinjar requires every 45 seconds
 	setInterval(function(){
@@ -427,6 +427,14 @@ coinjarWss.on("open", function connection(socket){
 			}
 		}
 	});
+
+    coinjarWss.on('close', function (evt) {
+        console.log("closed")
+    });
+
+    coinjarWss.on('error', function (evt) {
+        console.log("error!!", evt)
+    });
 });
 
 // GET DATA FROM BINANCE
