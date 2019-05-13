@@ -82,7 +82,7 @@ app.factory('utilities', function(){
 		console.log("oppsArra", output)
 
 		for (var i = 0; i < output.length; i++ ) {	
-			output[i].display_ROI = output[i].ROI_of_trade.toFixed(1)
+			output[i].display_ROI = output[i].ROI_of_trade.toFixed(1) + "%"
 		};
 	
 		return output;
