@@ -225,18 +225,18 @@ coinjarWss.on("open", function connection(socket){
         if (coinjarDataObj["topic"] !== "phoenix") {
             if (coinjarDataObj["event"] == "init") {
                 for (var i = 0; i < coinjarDataObj.payload.trades.length; i ++){                    
-                    context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[i])
+                    // context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[i])
                 }
             } else if (coinjarDataObj["event"] == "new") {
                 console.log("IAM DATA OBJ", coinjarDataObj.payload.trades[0])
-                context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[0])
+                // context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[0])
             }
         }
     });
 
-    coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSDT"]));
-    // coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]);
-    // coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECBTC"]);
+    // coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSDT"]));
+    coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]));
+    coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECBTC"]));
 
 
     coinjarWss.on('close', function (evt) {
