@@ -8,7 +8,7 @@
 
 // var app = angular.module('MySocektApp', ['ngMaterial', 'LocalStorageModule', 'btford.socket-io']);
 
-var app = angular.module('arbitrage-bot',['btford.socket-io', "utilities"]);
+var app = angular.module('arbitrage-bot',['btford.socket-io']);
 
 
 app.service('SocketService', ['socketFactory', function SocketService(socketFactory) {
@@ -23,6 +23,7 @@ app.factory('utilities', function(){
 	var outputObj = {};
 
 	outputObj.calculateTime = function(currentTime, tradeTime) {
+		console.log("calculateTime",currentTime, tradeTime)
 		if ((currentTime - tradeTime) > 60000 && (currentTime - tradeTime) < 60*60*1000) {
 			var minute = Math.round(((currentTime - tradeTime) / 60000), 0);
 
@@ -41,15 +42,17 @@ app.factory('utilities', function(){
 	};
 
 	outputObj.updateTime = function(oppsArray){
+		// console.log("I am in update time")
 		var currentTime;
 		var output = oppsArray;
 
-		for (var i = i; i < oppsArray.length ; i++) {
+		for (var i = 0; i < oppsArray.length ; i++) {
 
 			currentTime = outputObj.calculateTime(Date.now(), oppsArray[i].time_of_trade)
 			output[i].time_of_trade = currentTime;
 
 		}
+		console.log("I am in update time", output)
 		return output
 	};
 
@@ -57,7 +60,7 @@ app.factory('utilities', function(){
 
 		var output = oppsArray;
 
-		for (var i = i; i < oppsArray.length; i++ ) {
+		for (var i = 0; i < oppsArray.length; i++ ) {
 
 			if (output[i].type_of_trade == 2){
 				output[i].description = "Trade " + output[i].first.symbol + " & " + output[i].second.symbol + " at " + output[i].first.exchange + " & " + output[i].second.exchange
@@ -72,6 +75,8 @@ app.factory('utilities', function(){
 
 		return output;
 	}
+	
+	return outputObj;
 
     	// array lenght = 3
     	// [
@@ -183,6 +188,7 @@ app.controller('homeController', function($scope, SocketService, $interval, util
     }
 
     SocketService.on('message', function(msg) {
+        console.log(typeof(msg), msg)
         var message = JSON.parse(msg);
 
         if (message.message = "opportunities") {

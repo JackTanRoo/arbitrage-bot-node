@@ -93,9 +93,9 @@
        <div ng-repeat = "trade in trades" class="statcard statcard-passive p-4 mb-2" style="background-color:#6c757d">
         <h3 class="statcard-number">
           {{ trade.ROI_of_trade }}
-          <small class="delta-indicator">{{ trade.display_time }}</small>
+          <small class="delta-indicator">{{ trade.time_of_trade }}</small>
         </h3>
-        <span class="statcard-desc"> Trade BTC, USDT and LTC at Binance & Coinjar</span>
+        <span class="statcard-desc"> {{ trade.description }}</span>
       </div>
 
 

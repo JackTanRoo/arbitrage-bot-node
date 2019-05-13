@@ -342,7 +342,7 @@ io.on('connection', function(client) {
 
         client.emit('message', 
         	JSON.stringify({
-        		message: "oppportunities",
+        		message: "opportunities",
         		trades: lastTrades
         	})
         );
