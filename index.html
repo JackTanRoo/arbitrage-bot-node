@@ -87,11 +87,11 @@
       <div class="hr-divider mt-3 mb-5">
         <h3 class="hr-divider-content hr-divider-heading">Recommended Opportunities</h3>
       </div>
-      <div class="statcard statcard-passive p-4 mb-2" style="background-color:#6c757d" ng-click="showTradeInfo()"></div>
+      <div class="statcard statcard-passive p-4 mb-2" style="background-color:#6c757d" ng-click="showTradeInfo(item)" ></div>
       <br>
       <!-- start the  -->
 
-       <div ng-repeat = "trade in trades" class="statcard statcard-passive p-4 mb-2" style="background-color:#6c757d" ng-click="showTradeInfo()" id="{{ trade }}>
+       <div ng-repeat = "trade in trades" class="statcard statcard-passive p-4 mb-2" style="background-color:#6c757d" ng-click="showTradeInfo(item)" data-id="{{ $index }}>
         <h3 class="statcard-number">
           {{ trade.display_ROI }}
           <small class="delta-indicator">{{ trade.time_of_trade }}</small>

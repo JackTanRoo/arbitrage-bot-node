@@ -91,7 +91,7 @@ app.factory('utilities', function(){
 	return outputObj;
 });
 
-app.controller('homeController', function($scope, SocketService, $interval, utilities) {
+app.controller('homeController', function($scope, SocketService, $interval, utilities, $attrs) {
 	// console.log("I am in homeController", $scope.hello)
 
     $scope.array = [];
@@ -125,10 +125,32 @@ app.controller('homeController', function($scope, SocketService, $interval, util
 
     SocketService.emit('toBackEnd', {roomId:'temp', data: "hellowwwwwww from client", date: new Date() })
 
-	$scope.showTradeInfo = function(){
-		console.log("scope trading data", $scope.trading_data);	
+	$scope.showTradeInfo = function(item){
+		var domID = item.attributes['data-id'].value
+		console.log("domID", domID)
+		var id = angular.element(item).data("id")
+		console.log("scope trading data", id, $scope.trading_data);	
 	}
 	
+
+	$scope.trades = [
+		{
+			selected: true, 
+			trade_id: 1,
+			type_of_trade: 2,
+			time_of_trade: 1556173353463,
+			display_time: utilities.calculateTime(Date.now(), 1556173353463),
+			ROI_of_trade: 0.03
+		},
+		{
+			selected: true, 
+			trade_id: 2,
+			type_of_trade: 3,
+			time_of_trade: 1556173353463,
+			display_time: utilities.calculateTime(Date.now(), 1556173353463),
+			ROI_of_trade: 0.03
+		}		
+	]
 
 });
 
@@ -182,71 +204,6 @@ app.controller('showTradeInfo', function($scope) {
 app.controller("recommenderController", function($scope, utilities){
 	$scope.hello = {
 		what: "is up"
-	}
-
-	$scope.arbitrage = {
-		hello: "world",
- 		UUID : {
-			selected: true, 
-			trade_id: 1,
-			type_of_trade: "twoWay",
-			time_of_trade: 1556173353463,
-			display_time: utilities.calculateTime(Date.now(), 1556173353463),
-			ROI: 0.03,
-			trades: {
-				first: {
-					exchange: "binance",
-					symbol: "BTCUSDT",
-					indexTradeData: 0,
-					trade: "buy",
-					time: 1556173353463,
-					buy: {
-						asset: "BTC",
-						price: 5000,
-						quantity: 1,
-					},
-					sell: {
-						asset: "USDT",
-						price: 1/5000,
-						quantity: 5000 * 1,
-					}
-				},
-				second: {
-					exchange: "binance",
-					symbol: "BTCUSDT",
-					indexTradeData: 0,
-					trade: "buy",
-					time: 1556173353463,
-					buy: {
-						asset: "BTC",
-						price: 5000,
-						quantity: 1,
-					},
-					sell: {
-						asset: "USDT",
-						price: 1/5000,
-						quantity: 5000 * 1,
-					}
-				},
-				third: {
-					exchange: "binance",
-					symbol: "BTCUSDT",
-					indexTradeData: 0,
-					trade: "buy",
-					time: 1556173353463,
-					buy: {
-						asset: "BTC",
-						price: 5000,
-						quantity: 1,
-					},
-					sell: {
-						asset: "USDT",
-						price: 1/5000,
-						quantity: 5000 * 1,
-					}
-				}
-			}
-		}	
 	}
 })
 
