@@ -92,19 +92,14 @@ app.factory('utilities', function(){
 });
 
 app.controller('homeController', function($scope, SocketService, $interval, utilities) {
-	console.log("I am in homeController", $scope.hello)
+	// console.log("I am in homeController", $scope.hello)
 
     $scope.array = [];
     $scope.message = {};
     SocketService.emit('room', { roomId: "temp" });
 
-    $scope.add = function() {
-        SocketService.emit('toBackEnd', {roomId:'temp', data: $scope.message, date: new Date() })
-        $scope.array.push({ data: $scope.message, date: new Date() })
-    }
-
     SocketService.on('message', function(msg) {
-        console.log(typeof(msg), msg)
+        // console.log(typeof(msg), msg)
         var message = JSON.parse(msg);
 
         if (message.message = "opportunities") {
@@ -126,13 +121,20 @@ app.controller('homeController', function($scope, SocketService, $interval, util
     		date: new Date() 
     	});
 
-    }, 10000)
+    }, 3000)
 
     SocketService.emit('toBackEnd', {roomId:'temp', data: "hellowwwwwww from client", date: new Date() })
 
+	$scope.showTradeInfo = function(){
+		console.log("scope trading data", $scope.trading_data);	
+	}
+	
+
 });
 
-app.controller('graphTrades', function($scope) {
+app.controller('showTradeInfo', function($scope) {
+
+
 	// onclick of a recommendation card
 	// pull data from $scope.trading_data based on symbol of first, second, third asse t
 	// then plot the last 10 data points

@@ -3,8 +3,14 @@ var express = require('express');
 var path = require('path');
 var app = express();
 var server = require('http').createServer(app);
+var binanceKey = require("./binance-key");
 
 const WebSocket = require('ws');
+
+const binance = require('node-binance-api')().options({
+  APIKEY: binanceKey.APIKEY,
+  useServerTime: true // If you get timestamp errors, synchronize to server time at startup
+});
 
 var context = {
     "selected_exchanges": {
@@ -196,56 +202,90 @@ var context = {
     }   
 };
 
-var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
+// var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
 
-coinjarWss.on("open", function connection(socket){
-    console.log("Server connected to coinjar")  
+// coinjarWss.on("open", function connection(socket){
+//     console.log("Server connected to coinjar")  
 
-    // set heartbeat every 40 seconds - coinjar requires every 45 seconds
-    setInterval(function(){
-        console.log("trying to send a heartbeat")
-        coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]));
-        // console.log("sending heart beat!")
-    }, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
-
-
-    // subscribe to coinjar token channel
-    // coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSD"]);
-    // coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECUSD"]);
+//     // set heartbeat every 40 seconds - coinjar requires every 45 seconds
+//     setInterval(function(){
+//         console.log("trying to send a heartbeat")
+//         coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]));
+//         // console.log("sending heart beat!")
+//     }, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
 
 
-    // get message from coinjar Socket
+//     // subscribe to coinjar token channel
+//     // coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCUSD"]);
+//     // coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECUSD"]);
 
-    coinjarWss.on('message', function incoming(message) {
-        // console.log("received message", message)
-        coinjarDataObj = JSON.parse(message);
-        console.log(coinjarDataObj)
-        coinjarData = coinjarDataObj["payload"];
+
+//     // get message from coinjar Socket
+
+//     coinjarWss.on('message', function incoming(message) {
+//         // console.log("received message", message)
+//         coinjarDataObj = JSON.parse(message);
+//         console.log(coinjarDataObj)
+//         coinjarData = coinjarDataObj["payload"];
         
-        if (coinjarDataObj["topic"] !== "phoenix") {
-            if (coinjarDataObj["event"] == "init") {
-                for (var i = 0; i < coinjarDataObj.payload.trades.length; i ++){                    
-                    // context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[i])
-                }
-            } else if (coinjarDataObj["event"] == "new") {
-                console.log("IAM DATA OBJ", coinjarDataObj.payload.trades[0])
-                // context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[0])
+//         if (coinjarDataObj["topic"] !== "phoenix") {
+//             if (coinjarDataObj["event"] == "init") {
+//                 for (var i = 0; i < coinjarDataObj.payload.trades.length; i ++){                    
+//                     // context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[i])
+//                 }
+//             } else if (coinjarDataObj["event"] == "new") {
+//                 console.log("IAM DATA OBJ", coinjarDataObj.payload.trades[0])
+//                 // context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[0])
+//             }
+//         }
+//     });
+
+//     coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCAUD"]));
+//     coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]));
+//     coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECBTC"]));
+
+
+//     coinjarWss.on('close', function (evt) {
+//         console.log("closed")
+//     });
+
+//     coinjarWss.on('error', function (evt) {
+//         console.log("error!!", evt)
+//     });
+// });
+
+
+
+    binance.websockets.trades([
+        context["crypto_exchange_parameters"]["binance"]["channel_sub"]["BTCUSDT"],
+        context["crypto_exchange_parameters"]["binance"]["channel_sub"]["ZECBTC"],
+        context["crypto_exchange_parameters"]["binance"]["channel_sub"]["LTCUSDT"]
+
+        ], (trades) => {
+            console.log(trades)
+            let {e:eventType, E:eventTime, s:symbol, p:price, q:quantity, m:maker, a:tradeId} = trades;
+            context.trading_data = updateTradingLog(context.trading_data, "binance", trades.s, trades);
+            
+            var coinJarOppositePair = context.twoWayLookup[trades.s];
+            var lastTrade = context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1]
+
+            if (isTwoWayArbitrage(1, 
+                context.trading_data.binance[trades.s]
+                [context.trading_data.binance[trades.s].length-1], 
+                context.trading_data.coinjar[coinJarOppositePair]
+                [context.trading_data.coinjar[coinJarOppositePair]
+                .length-1]).profitable)
+            {
+                context.arbitrage_opportunities.allOpportunities.push( 
+                    isTwoWayArbitrage(1, 
+                    context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1], 
+                    context.trading_data.coinjar[coinJarOppositePair][context.trading_data.coinjar[coinJarOppositePair].length-1]))
+
+                // console.log("there is a profitable trade", context.arbitrage_opportunities)
             }
-        }
-    });
 
-    coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCAUD"]));
-    coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]));
-    coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECBTC"]));
+            // console.log(context.trading_data)
+          // console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", maker: "+maker);
 
 
-    coinjarWss.on('close', function (evt) {
-        console.log("closed")
-    });
-
-    coinjarWss.on('error', function (evt) {
-        console.log("error!!", evt)
-    });
-
-
-});
+    })

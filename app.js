@@ -139,7 +139,52 @@ var context = {
 
 			// }
 		,
-		allOpportunities : []
+		allOpportunities : [
+			{
+				trade_id: 1,
+				type_of_trade: 2,
+				time_of_trade: 150000000,
+				ROI_of_trade: 0.03,
+				trades: {
+					first: {
+						exchange: "binance",
+						symbol: "BTCUSDT",
+						indexTradeData: 1,
+						trade: "buy",
+						time: 150000000,
+						buyAsset: "BTC",
+						sellAsset: "USDT",
+						buyPrice:5800,
+						buyQuantity: 1,
+						sellQuantity: 5800
+					},
+					second: {
+						exchange: "binance",
+						symbol: "BTCUSDT",
+						indexTradeData: 1,
+						trade: "buy",
+						time: 150000000,
+						buyAsset: "BTC",
+						sellAsset: "USDT",
+						buyPrice:5800,
+						buyQuantity: 1,
+						sellQuantity: 5800
+					},
+					third: {
+						exchange: "binance",
+						symbol: "BTCUSDT",
+						indexTradeData: 1,
+						trade: "buy",
+						time: 150000000,
+						buyAsset: "BTC",
+						sellAsset: "USDT",
+						buyPrice:5800,
+						buyQuantity: 1,
+						sellQuantity: 5800
+					}
+				}
+			}
+		]
 			// 12325315314 : {
 
 			// }
@@ -459,9 +504,9 @@ coinjarWss.on("open", function connection(socket){
 //   M: true 
 // }
 
-setTimeout(function(){
+setInterval(function(){
 
-	console.log("trying to send binance heartbeat")
+	console.log("trying to send binance heartbeat", context.trading_data)
 
 	binance.websockets.trades([
 		context["crypto_exchange_parameters"]["binance"]["channel_sub"]["BTCUSDT"],
@@ -495,8 +540,9 @@ setTimeout(function(){
 		  // console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", maker: "+maker);
 
 
-	})}, 
-20000);
+	})
+}, 
+5000);
 
 // GET DATA FROM FOREXT
 
