@@ -25,9 +25,9 @@ var context = {
 			"heartbeat_freq": 15000,
 			"heartbeat_message": '{ "topic": "phoenix", "event": "heartbeat", "payload": {}, "ref": 0 }',
 			"channel_sub": {
-				"BTCAUD": '{ "topic": "trades:BTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }',
-				"LTCAUD": '{ "topic": "trades:LTCAUD", "event": "phx_join", "payload": {}, "ref": 0 }',
-				"ZECBTC": '{ "topic": "trades:ZECBTC", "event": "phx_join", "payload": {}, "ref": 0 }'
+				"BTCAUD": { "topic": "trades:BTCAUD", "event": "phx_join", "payload": {}, "ref": 0 },
+				"LTCAUD": { "topic": "trades:LTCAUD", "event": "phx_join", "payload": {}, "ref": 0 },
+				"ZECBTC": { "topic": "trades:ZECBTC", "event": "phx_join", "payload": {}, "ref": 0 }
 			}, 
 			"slippage": 0.01,
 			"fees": 0.001,
@@ -276,6 +276,7 @@ var context = {
 //   wss.send('opened, something');
 // });
 
+var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
 
 var app = express();
 // var app2 = express();
@@ -343,7 +344,8 @@ io.on('connection', function(client) {
         client.emit('message', 
         	JSON.stringify({
         		message: "opportunities",
-        		trades: lastTrades
+        		trades: lastTrades,
+        		trading_data: context.trading_data
         	})
         );
     })
@@ -385,14 +387,13 @@ server.listen(port, function () {
 // 	{"topic":"ticker:LTCAUD","ref":null,"payload":{"volume":"181.00000000","transition_time":"2019-04-04T07:50:00Z","status":"continuous","session":11800,"prev_close":"117.80000000","last":"122.30000000","current_time":"2019-04-04T05:59:11.670951Z","bid":"116.40000000","ask":"122.10000000"},"event":"update"}
 
 
-var coinjarWss = new WebSocket(context["crypto_exchange_parameters"]["coinjar"]["data_endpoint"]);
 
 coinjarWss.on("open", function connection(socket){
 	console.log("Server connected to coinjar")	
 
-    coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCAUD"]);
-    coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]);
-    coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECBTC"]);
+    // coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCAUD"]);
+    // coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]);
+    // coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECBTC"]);
 
 	// set heartbeat every 40 seconds - coinjar requires every 45 seconds
 	setInterval(function(){
@@ -435,6 +436,10 @@ coinjarWss.on("open", function connection(socket){
     coinjarWss.on('error', function (evt) {
         console.log("error!!", evt)
     });
+
+    coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCAUD"]));
+    coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]));
+    coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["ZECBTC"]));
 });
 
 // GET DATA FROM BINANCE
@@ -509,7 +514,7 @@ setInterval(function(){
 	    console.log(error);
 	  });
 
-}, 5000)
+}, 20000)
 
 
 // update the context variable with latest trade data and format into the same format

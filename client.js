@@ -112,6 +112,7 @@ app.controller('homeController', function($scope, SocketService, $interval, util
         	$scope.trades = utilities.updateTime($scope.trades)
         	$scope.trades = utilities.updateCardDesc($scope.trades)
         	$scope.trades = utilities.updateROI(message.trades)
+        	$scope.trading_data = message.trading_data
         }
     	// console.log("got message from server", msg)
 
@@ -130,6 +131,13 @@ app.controller('homeController', function($scope, SocketService, $interval, util
     SocketService.emit('toBackEnd', {roomId:'temp', data: "hellowwwwwww from client", date: new Date() })
 
 });
+
+app.controller('graphTrades', function($scope) {
+	// onclick of a recommendation card
+	// pull data from $scope.trading_data based on symbol of first, second, third asse t
+	// then plot the last 10 data points
+})
+
 
 
 // Start a recommendations pane
