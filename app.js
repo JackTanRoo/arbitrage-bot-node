@@ -23,7 +23,7 @@ var context = {
 			"name": "coinjar",
 			"data_endpoint": "wss://feed.exchange.coinjar.com/socket/websocket",
 			"heartbeat_freq": 15000,
-			"heartbeat_message": '{ "topic": "phoenix", "event": "heartbeat", "payload": {}, "ref": 0 }',
+			"heartbeat_message": { "topic": "phoenix", "event": "heartbeat", "payload": {}, "ref": 0 },
 			"channel_sub": {
 				"BTCAUD": { "topic": "trades:BTCAUD", "event": "phx_join", "payload": {}, "ref": 0 },
 				"LTCAUD": { "topic": "trades:LTCAUD", "event": "phx_join", "payload": {}, "ref": 0 },
@@ -398,9 +398,9 @@ coinjarWss.on("open", function connection(socket){
 	// set heartbeat every 40 seconds - coinjar requires every 45 seconds
 	setInterval(function(){
 		console.log("trying to send a heartbeat")
-		coinjarWss.send(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"], function(error){
-			console.log("received error", error)
-		});
+		
+        coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]));
+
 		// console.log("sending heart beat!")
 	}, context["crypto_exchange_parameters"]["coinjar"]["heartbeat_freq"])
 
@@ -413,7 +413,7 @@ coinjarWss.on("open", function connection(socket){
 	// get message from coinjar Socket
 
 	coinjarWss.on('message', function incoming(message) {
-		// console.log("received message", message)
+		console.log("received message", message)
 		coinjarDataObj = JSON.parse(message);
 		coinjarData = coinjarDataObj["payload"];
 		
