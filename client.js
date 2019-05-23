@@ -15,7 +15,7 @@ app.service('SocketService', ['socketFactory', function SocketService(socketFact
     return socketFactory({
         ioSocket: io.connect('http://localhost:3000')
     });
-}]);
+}]); 
 
 // factory to update scope.opportunities elements
 
