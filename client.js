@@ -8,7 +8,7 @@
 
 // var app = angular.module('MySocektApp', ['ngMaterial', 'LocalStorageModule', 'btford.socket-io']);
 
-var app = angular.module('arbitrage-bot',['btford.socket-io']);
+var app = angular.module('arbitrage-bot',['btford.socket-io', 'chart.js']);
 
 
 app.service('SocketService', ['socketFactory', function SocketService(socketFactory) {
