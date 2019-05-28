@@ -126,7 +126,7 @@ app.controller('homeController', function($scope, SocketService, $interval, util
     SocketService.emit('toBackEnd', {roomId:'temp', data: "hellowwwwwww from client", date: new Date() })
 
 	$scope.showTradeInfo = function(item){
-		console.log("i am item",item)
+		console.log("i am trading data", item ,$scope.trading_data, "I am trades", $scope.trades)
 		var domID = item.attributes['data-id'].value
 		console.log("domID", domID)
 		var id = angular.element(item).data("id")

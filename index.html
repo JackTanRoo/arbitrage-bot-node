@@ -125,7 +125,18 @@
       </div>
       <br>
       <!-- dynamic trading chart -->
-      <div id="chart"></div>
+      <div role="tabpanel" class="tab-pane active" id="sales">
+        <div class="ex-line-graphs">
+           <canvas
+            class="ex-line-graph"
+            width="600" height="350"
+            data-chart="line"
+            data-dataset="[[2500, 3300, 2512, 2775, 2498, 3512, 2925, 4275, 3507, 3825, 3445, 3985]]"
+            data-labels="['','Aug 29','','','Sept 5','','','Sept 12','','','Sept 19','']"
+            data-dark="true">
+          </canvas>
+        </div>
+      </div>
       <!-- chart using chart.js -->
 
 <!--       <div class="tab-content">
