@@ -91,7 +91,7 @@
       <br>
       <!-- start the  -->
 
-       <div ng-repeat = "trade in trades" class="statcard statcard-passive p-4 mb-2" style="background-color:#6c757d" ng-click="showTradeInfo(item)" data-id="{{ $index }}>
+       <div ng-repeat = "trade in trades" class="statcard statcard-passive p-4 mb-2" style="background-color:#6c757d" ng-click="showTradeInfo($index)" data-id="{{ $index }}">
         <h3 class="statcard-number">
           {{ trade.display_ROI }}
           <small class="delta-indicator">{{ trade.time_of_trade }}</small>
