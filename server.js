@@ -26,7 +26,7 @@ const axios = require('axios');
 var moment = require("moment");
 
 
-var app = express();
+var app = express(); 
 
 // console.log("ccxt")
 // init context of params
