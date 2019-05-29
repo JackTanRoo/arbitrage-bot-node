@@ -125,12 +125,6 @@ app.controller('homeController', function($scope, SocketService, $interval, util
 
     SocketService.emit('toBackEnd', {roomId:'temp', data: "hellowwwwwww from client", date: new Date() })
 
-	$scope.showTradeInfo = function(item){
-
-		$scope.graphToDisplay = item;
-
-	}
-	
 
 	$scope.trades = [
 		{
@@ -226,77 +220,92 @@ app.controller("LineCtrl", function ($scope) {
 
   }
 
+	$scope.showTradeInfo = function(item){
+		console.log(" i am in trade info", item)
+		$scope.graphToDisplay = item;
+
+		// getRightGraphDataPoints(item);
+		var dataOutput = $scope.getRightGraphDataPoints(item);
+		$scope.labels =  dataOutput.labels
+		$scope.series = dataOutput.series
+		$scope.data = dataOutput.data
+
+	}
+
+
   // get the right exchanges, get the right time of the trade, get the 4 data points to either side of the trade
 
-  function getRightGraphDataPoints(tradeDataPoint){
-  	var output = {}
+   $scope.getRightGraphDataPoints = function (tradeDataPoint) {
+	   	console.log("get Right Graph Data is getting called", $scope)
+	  	var output = {}
 
-	if ($scope.trading_data[tradeDataPoint].first) {
-	
-	  	var firstExchange = $scope.trades[tradeDataPoint].first.exchange;
-	  	var firstExchangeTradingTime = $scope.trades[tradeDataPoint].first.time;
-	  	var firstExchangeTradingSymbol = $scope.trades[tradeDataPoint].first.symbol;
+		if ($scope.trades[tradeDataPoint].first) {
+		
+		  	var firstExchange = $scope.trades[tradeDataPoint].first.exchange;
+		  	var firstExchangeTradingTime = $scope.trades[tradeDataPoint].first.time;
+		  	var firstExchangeTradingSymbol = $scope.trades[tradeDataPoint].first.symbol;
 
-	  	// get the 9 data points for labels
-  		output = getTradingData(firstExchange, firstExchangeTradingTime, firstExchangeTradingSymbol)
-  		console.log("I am output for first", output)
-  	
-  	} else {
-  		
-  		return
-  	
-  	}
+		  	// get the 9 data points for labels
+	  		output = getTradingData(firstExchange, firstExchangeTradingTime, firstExchangeTradingSymbol)
+	  		console.log("I am output for first", output)
+	  	
+	  	} else {
+	  		
+	  		return
+	  	
+	  	}
 
-  	if ($scope.trading_data[tradeDataPoint].second) {
-  		
-  		var secondExchange = $scope.trades[tradeDataPoint].second.exchange
-  		var secondExchangeTradingTime = $scope.trades[tradeDataPoint].second.time
-	  	var secondExchangeTradingSymbol = $scope.trades[tradeDataPoint].second.symbol;
+	  	if ($scope.trades[tradeDataPoint].second) {
+	  		
+	  		var secondExchange = $scope.trades[tradeDataPoint].second.exchange
+	  		var secondExchangeTradingTime = $scope.trades[tradeDataPoint].second.time
+		  	var secondExchangeTradingSymbol = $scope.trades[tradeDataPoint].second.symbol;
 
-  		output = getTradingData(secondExchange, secondExchangeTradingTime, secondExchangeTradingSymbol)
-  		console.log("I am output for second", output)
-  	
-  	} else {
-  		return 
-  	}
+	  		output = getTradingData(secondExchange, secondExchangeTradingTime, secondExchangeTradingSymbol)
+	  		console.log("I am output for second", output)
+	  	
+	  	} else {
+	  		return 
+	  	}
 
-  	if ($scope.trading_data[tradeDataPoint].third) {
-  		var thirdExchange = $scope.trades[tradeDataPoint].third.exchange
-  		var thirdExchangeTradingTime = $scope.trades[tradeDataPoint].third.time
-	  	var thirdExchangeTradingSymbol = $scope.trades[tradeDataPoint].third.symbol;
+	  	if ($scope.trades[tradeDataPoint].third) {
+	  		var thirdExchange = $scope.trades[tradeDataPoint].third.exchange
+	  		var thirdExchangeTradingTime = $scope.trades[tradeDataPoint].third.time
+		  	var thirdExchangeTradingSymbol = $scope.trades[tradeDataPoint].third.symbol;
 
-  		output = getTradingData(thirdExchange, thirdExchangeTradingTime, thirdExchangeTradingSymbol)
-  		console.log("I am output for third", output)
+	  		output = getTradingData(thirdExchange, thirdExchangeTradingTime, thirdExchangeTradingSymbol)
+	  		console.log("I am output for third", output)
 
-  	} else {
-  		console.log("no third exchange")
-  	}
+	  	} else {
+	  		console.log("no third exchange")
+	  	}
 
-  	// output {
-		// firstExchange: {
-		  	// 	time:[],
-		  	// 	price: []
-	  	// }
-  	// };
+	  	// output {
+			// firstExchange: {
+			  	// 	time:[],
+			  	// 	price: []
+		  	// }
+	  	// };
 
 
-  	// NOTE - NEED TO ADD LOGIC FOR THIRD EXCHANGE
-  	
-  	var dataOutput = {
-  		labels : output[firstExchange].time,
+	  	// NOTE - NEED TO ADD LOGIC FOR THIRD EXCHANGE
 
-  		series: [
-  			firstExchange,
-  			secondExchange
-  		],
+	  	var dataOutput = {
+	  		labels : output[firstExchange].time,
 
-  		data: [
-  			// exchange 1 data - 9 data points
-  			// exchange 2 data - 9 data points
-  		]
+	  		series: [
+	  			firstExchange,
+	  			secondExchange
+	  		],
 
-  	}
-  	return dataOutput;
+	  		data: [
+	  			output[firstExchange].price,
+	  			output[secondExchange].price
+	  			// exchange 2 data - 9 data points
+	  		]
+
+	  	}
+	  	return dataOutput;
   }
 
 
@@ -306,16 +315,14 @@ app.controller("LineCtrl", function ($scope) {
 
   // freeze the view in chartjs
 
+  // $scope.labels = ["January", "February", "March", "April", "May", "June", "July"];
   
 
-  $scope.labels = ["January", "February", "March", "April", "May", "June", "July"];
-  
-
-  $scope.series = ['Series A', 'Series B'];
-  $scope.data = [
-    [65, 59, 80, 81, 56, 55, 40],
-    [28, 48, 40, 19, 86, 27, 90]
-  ];
+  // $scope.series = ['Series A', 'Series B'];
+  // $scope.data = [
+  //   [65, 59, 80, 81, 56, 55, 40],
+  //   [28, 48, 40, 19, 86, 27, 90]
+  // ];
 
   $scope.datasetOverride = [{ yAxisID: 'y-axis-1' }, { yAxisID: 'y-axis-2' }];
   
@@ -337,6 +344,8 @@ app.controller("LineCtrl", function ($scope) {
       ]
     }
   };
+
+
 });
 
 
