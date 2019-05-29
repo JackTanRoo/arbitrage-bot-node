@@ -196,6 +196,8 @@ app.controller("LineCtrl", function ($scope) {
 
 
   function getTradingData (exchangeName, tradingTime, symbol){
+	
+	console.log("I am in getTradingData")
 
   	var output = {};
 
@@ -205,13 +207,15 @@ app.controller("LineCtrl", function ($scope) {
   	};
 
   	var interim = [];
+	console.log("I am out side for loop", $scope.trading_data[exchangeName], tradingTime)
 
-  	for (var i = 0; i < $scope.trading_data[exchangeName].length; i ++) {
-
-  		if (scope[exchangeName][i].time == tradingTime) {
+  	for (var i = 0; i < $scope.trading_data[exchangeName][symbol].length; i ++) {
+  		console.log("I am in for loop")
+  		if ($scope.trading_data[exchangeName][symbol][i].time == tradingTime) {
   			// push the 4 data points on either side of the element
-  			output[exchangeName].time = returnArray(4, i, $scope.trading_data[exchangeName][symbol], "time");
-  			output[exchangeName].price = returnArray(4, i, $scope.trading_data[exchangeName][symbol], "price")
+  			console.log("I am in if statement")
+  			output.time = returnArray(4, i, $scope.trading_data[exchangeName][symbol], "time");
+  			output.price = returnArray(4, i, $scope.trading_data[exchangeName][symbol], "price")
   		
   		}
   	}
@@ -221,7 +225,7 @@ app.controller("LineCtrl", function ($scope) {
   }
 
 	$scope.showTradeInfo = function(item){
-		console.log(" i am in trade info", item)
+		// console.log(" i am in trade info", item)
 		$scope.graphToDisplay = item;
 
 		// getRightGraphDataPoints(item);
