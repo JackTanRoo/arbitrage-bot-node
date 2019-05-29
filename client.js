@@ -157,7 +157,7 @@ app.controller("LineCtrl", function ($scope) {
   // x axis for time series
 
   // function convertTime
-  // scope.tradingdata = {
+  // scope.trading_data = {
   		// binance: {
 			// BTCUSDT:
   			// [{
@@ -199,14 +199,14 @@ app.controller("LineCtrl", function ($scope) {
 
   	var output = {};
 
-  	output[exchangeName] = {
+  	output = {
   		time:[],
   		price: []
   	};
 
   	var interim = [];
 
-  	for (var i = 0; i < $scope[exchangeName].length; i ++) {
+  	for (var i = 0; i < $scope.trading_data[exchangeName].length; i ++) {
 
   		if (scope[exchangeName][i].time == tradingTime) {
   			// push the 4 data points on either side of the element
@@ -246,7 +246,7 @@ app.controller("LineCtrl", function ($scope) {
 		  	var firstExchangeTradingSymbol = $scope.trades[tradeDataPoint].first.symbol;
 
 		  	// get the 9 data points for labels
-	  		output = getTradingData(firstExchange, firstExchangeTradingTime, firstExchangeTradingSymbol)
+	  		output[firstExchange] = getTradingData(firstExchange, firstExchangeTradingTime, firstExchangeTradingSymbol)
 	  		console.log("I am output for first", output)
 	  	
 	  	} else {
@@ -261,7 +261,7 @@ app.controller("LineCtrl", function ($scope) {
 	  		var secondExchangeTradingTime = $scope.trades[tradeDataPoint].second.time
 		  	var secondExchangeTradingSymbol = $scope.trades[tradeDataPoint].second.symbol;
 
-	  		output = getTradingData(secondExchange, secondExchangeTradingTime, secondExchangeTradingSymbol)
+	  		output[secondExchange] = getTradingData(secondExchange, secondExchangeTradingTime, secondExchangeTradingSymbol)
 	  		console.log("I am output for second", output)
 	  	
 	  	} else {
@@ -273,7 +273,7 @@ app.controller("LineCtrl", function ($scope) {
 	  		var thirdExchangeTradingTime = $scope.trades[tradeDataPoint].third.time
 		  	var thirdExchangeTradingSymbol = $scope.trades[tradeDataPoint].third.symbol;
 
-	  		output = getTradingData(thirdExchange, thirdExchangeTradingTime, thirdExchangeTradingSymbol)
+	  		output[thirdExchange] = getTradingData(thirdExchange, thirdExchangeTradingTime, thirdExchangeTradingSymbol)
 	  		console.log("I am output for third", output)
 
 	  	} else {
@@ -287,7 +287,7 @@ app.controller("LineCtrl", function ($scope) {
 		  	// }
 	  	// };
 
-
+	  	console.log("I am output", output, firstExchange, secondExchange, thirdExchange);
 	  	// NOTE - NEED TO ADD LOGIC FOR THIRD EXCHANGE
 
 	  	var dataOutput = {
