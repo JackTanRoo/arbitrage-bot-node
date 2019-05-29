@@ -164,7 +164,9 @@ app.controller("LineCtrl", function ($scope) {
 
   // function convertTime
   // scope.tradingdata = {
-  		// binance: [{
+  		// binance: {
+			// BTCUSDT:
+  			// [{
 			// exchange: "binance"
 			// price: 7300
 			// quantity: 1
@@ -185,6 +187,44 @@ app.controller("LineCtrl", function ($scope) {
 	// type_of_trade: 2
 // }]
 
+
+  function returnArray(elementsOnEitherSide, elementIndex, wholeArray, attrName) {
+  	var output = []
+
+  	var counter = elementsOnEitherSide;
+
+  	while (counter >= -1 * elementsOnEitherSide ) {
+  		output.push(wholeArray[elementIndex - counter][attrName]);
+  		counter--;
+  	}
+  	return output;
+  }
+
+
+  function getTradingData (exchangeName, tradingTime, symbol){
+
+  	var output = {};
+
+  	output[exchangeName] = {
+  		time:[],
+  		price: []
+  	};
+
+  	var interim = [];
+
+  	for (var i = 0; i < $scope[exchangeName].length; i ++) {
+
+  		if (scope[exchangeName][i].time == tradingTime) {
+  			// push the 4 data points on either side of the element
+  			output[exchangeName].time = returnArray(4, i, $scope.trading_data[exchangeName][symbol], "time");
+  			output[exchangeName].price = returnArray(4, i, $scope.trading_data[exchangeName][symbol], "price")
+  		
+  		}
+  	}
+
+  	return output;
+
+  }
 
   // get the right exchanges, get the right time of the trade, get the 4 data points to either side of the trade
 
