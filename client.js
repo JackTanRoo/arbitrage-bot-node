@@ -126,8 +126,8 @@ app.controller('homeController', function($scope, SocketService, $interval, util
     SocketService.emit('toBackEnd', {roomId:'temp', data: "hellowwwwwww from client", date: new Date() })
 
 	$scope.showTradeInfo = function(item){
-		console.log("i am trading data", item ,$scope.trading_data, "I am trades", $scope.trades)
 
+		$scope.graphToDisplay = item;
 
 	}
 	
@@ -156,7 +156,102 @@ app.controller('homeController', function($scope, SocketService, $interval, util
 
 app.controller("LineCtrl", function ($scope) {
 
+  $scope.onHover = function (points, evt) {
+    console.log(points, evt);
+  };
+  
+  // x axis for time series
+
+  // function convertTime
+  // scope.tradingdata = {
+  		// binance: [{
+			// exchange: "binance"
+			// price: 7300
+			// quantity: 1
+			// symbol: "BTCUSDT"
+			// time: 1559096683127			
+  		// }]
+  // }
+
+  // scope.trades = [{
+	// ROI_of_trade: 99.9037464314745
+	// description: "Trade BTCUSDT & BTCAUD at binance & coinjar"
+	// display_ROI: "99.9%"
+	// first: {exchange: "binance", symbol: "BTCUSDT", indexTradeData: null, time: 1559096692571, buy: {…}, …}
+	// profitable: true
+	// second: {exchange: "coinjar", symbol: "BTCAUD", indexTradeData: null, time: 1559093601, buy: {…}, …}
+	// time_of_trade: "A few seconds ago"
+	// trade_id: 36
+	// type_of_trade: 2
+// }]
+
+
+  // get the right exchanges, get the right time of the trade, get the 4 data points to either side of the trade
+
+  function getRightGraphDataPoints(tradeDataPoint){
+
+
+	if ($scope.trading_data[tradeDataPoint].first) {
+	
+	  	var firstExchange = $scope.trades[tradeDataPoint].first.exchange;
+	  	var firstExchangeTradingTime = $scope.trades[tradeDataPoint].first.time;
+
+	  	// get the 9 data points for labels
+  	
+  	} else {
+  		return
+  	}
+
+  	if ($scope.trading_data[tradeDataPoint].second) {
+  		
+  		var secondExchange = $scope.trades[tradeDataPoint].second.exchange
+  		var secondExchangeTradingTime = $scope.trades[tradeDataPoint].second.time
+
+  	} else {
+  		return 
+  	}
+
+  	if ($scope.trading_data[tradeDataPoint].third) {
+  		var thirdExchange = $scope.trades[tradeDataPoint].third.exchange
+  		var thirdExchangeTradingTime = $scope.trades[tradeDataPoint].third.time
+  	} else {
+  		console.log("no third exchange")
+  	}
+
+
+  	var output = {
+  		labels = [
+  			// time of the 9 data points
+  			// 
+  		],
+
+  		series: [
+  			// exchange 1
+  			// exchange 2
+  		],
+
+  		data: [
+  			// exchange 1 data - 9 data points
+  			// exchange 2 data - 9 data points
+  		],
+
+  	}
+
+  	return output
+  }
+
+
+
+  // live update the graph 
+
+
+  // freeze the view in chartjs
+
+  
+
   $scope.labels = ["January", "February", "March", "April", "May", "June", "July"];
+  
+
   $scope.series = ['Series A', 'Series B'];
   $scope.data = [
     [65, 59, 80, 81, 56, 55, 40],
@@ -164,6 +259,7 @@ app.controller("LineCtrl", function ($scope) {
   ];
 
   $scope.datasetOverride = [{ yAxisID: 'y-axis-1' }, { yAxisID: 'y-axis-2' }];
+  
   $scope.options = {
     scales: {
       yAxes: [
