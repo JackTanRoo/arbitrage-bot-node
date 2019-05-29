@@ -127,10 +127,6 @@ app.controller('homeController', function($scope, SocketService, $interval, util
 
 	$scope.showTradeInfo = function(item){
 		console.log("i am trading data", item ,$scope.trading_data, "I am trades", $scope.trades)
-		var domID = item.attributes['data-id'].value
-		console.log("domID", domID)
-		var id = angular.element(item).data("id")
-		console.log("scope trading data", id, $scope.trading_data);	
 	}
 	
 
