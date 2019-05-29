@@ -127,6 +127,8 @@ app.controller('homeController', function($scope, SocketService, $interval, util
 
 	$scope.showTradeInfo = function(item){
 		console.log("i am trading data", item ,$scope.trading_data, "I am trades", $scope.trades)
+
+
 	}
 	
 
@@ -151,14 +153,36 @@ app.controller('homeController', function($scope, SocketService, $interval, util
 
 });
 
-app.controller('showTradeInfo', function($scope) {
 
+app.controller("LineCtrl", function ($scope) {
 
-	// onclick of a recommendation card
-	// pull data from $scope.trading_data based on symbol of first, second, third asse t
-	// then plot the last 10 data points
-})
+  $scope.labels = ["January", "February", "March", "April", "May", "June", "July"];
+  $scope.series = ['Series A', 'Series B'];
+  $scope.data = [
+    [65, 59, 80, 81, 56, 55, 40],
+    [28, 48, 40, 19, 86, 27, 90]
+  ];
 
+  $scope.datasetOverride = [{ yAxisID: 'y-axis-1' }, { yAxisID: 'y-axis-2' }];
+  $scope.options = {
+    scales: {
+      yAxes: [
+        {
+          id: 'y-axis-1',
+          type: 'linear',
+          display: true,
+          position: 'left'
+        },
+        {
+          id: 'y-axis-2',
+          type: 'linear',
+          display: true,
+          position: 'right'
+        }
+      ]
+    }
+  };
+});
 
 
 // Start a recommendations pane

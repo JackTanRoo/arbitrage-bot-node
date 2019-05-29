@@ -128,13 +128,15 @@
       <br>
       <!-- dynamic trading chart -->
       <div role="tabpanel" class="tab-pane active" id="sales">
-        <div class="ex-line-graphs">
-           <canvas
-            class="ex-line-graph"
+        <div class="ex-line-graphs" ng-controller="LineCtrl">
+           <canvas 
+            id="line"
+            class="ex-line-graph chart chart-line"
             width="600" height="350"
-            data-chart="line"
-            data-dataset="[[2500, 3300, 2512, 2775, 2498, 3512, 2925, 4275, 3507, 3825, 3445, 3985]]"
-            data-labels="['','Aug 29','','','Sept 5','','','Sept 12','','','Sept 19','']"
+            chart-data="data"
+            chart-labels="labels"
+            chart-series="series"
+            chart-options="options"
             data-dark="true">
           </canvas>
         </div>
