@@ -229,24 +229,33 @@ app.controller("LineCtrl", function ($scope) {
   // get the right exchanges, get the right time of the trade, get the 4 data points to either side of the trade
 
   function getRightGraphDataPoints(tradeDataPoint){
-
+  	var output = {}
 
 	if ($scope.trading_data[tradeDataPoint].first) {
 	
 	  	var firstExchange = $scope.trades[tradeDataPoint].first.exchange;
 	  	var firstExchangeTradingTime = $scope.trades[tradeDataPoint].first.time;
+	  	var firstExchangeTradingSymbol = $scope.trades[tradeDataPoint].first.symbol;
 
 	  	// get the 9 data points for labels
+  		output = getTradingData(firstExchange, firstExchangeTradingTime, firstExchangeTradingSymbol)
+  		console.log("I am output for first", output)
   	
   	} else {
+  		
   		return
+  	
   	}
 
   	if ($scope.trading_data[tradeDataPoint].second) {
   		
   		var secondExchange = $scope.trades[tradeDataPoint].second.exchange
   		var secondExchangeTradingTime = $scope.trades[tradeDataPoint].second.time
+	  	var secondExchangeTradingSymbol = $scope.trades[tradeDataPoint].second.symbol;
 
+  		output = getTradingData(secondExchange, secondExchangeTradingTime, secondExchangeTradingSymbol)
+  		console.log("I am output for second", output)
+  	
   	} else {
   		return 
   	}
@@ -254,30 +263,40 @@ app.controller("LineCtrl", function ($scope) {
   	if ($scope.trading_data[tradeDataPoint].third) {
   		var thirdExchange = $scope.trades[tradeDataPoint].third.exchange
   		var thirdExchangeTradingTime = $scope.trades[tradeDataPoint].third.time
+	  	var thirdExchangeTradingSymbol = $scope.trades[tradeDataPoint].third.symbol;
+
+  		output = getTradingData(thirdExchange, thirdExchangeTradingTime, thirdExchangeTradingSymbol)
+  		console.log("I am output for third", output)
+
   	} else {
   		console.log("no third exchange")
   	}
 
+  	// output {
+		// firstExchange: {
+		  	// 	time:[],
+		  	// 	price: []
+	  	// }
+  	// };
 
-  	var output = {
-  		labels = [
-  			// time of the 9 data points
-  			// 
-  		],
+
+  	// NOTE - NEED TO ADD LOGIC FOR THIRD EXCHANGE
+  	
+  	var dataOutput = {
+  		labels : output[firstExchange].time,
 
   		series: [
-  			// exchange 1
-  			// exchange 2
+  			firstExchange,
+  			secondExchange
   		],
 
   		data: [
   			// exchange 1 data - 9 data points
   			// exchange 2 data - 9 data points
-  		],
+  		]
 
   	}
-
-  	return output
+  	return dataOutput;
   }
 
 
