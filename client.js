@@ -269,7 +269,7 @@ app.controller("LineCtrl", function ($scope) {
 		$scope.series = dataOutput.series
 		$scope.data = dataOutput.data
 
-		$scope.tradeStepsToDisplay(item)
+		$scope.tradeSteps =	$scope.tradeStepsToDisplay(item);
 	}
 
 
@@ -393,20 +393,50 @@ app.controller("LineCtrl", function ($scope) {
 
   // SCOPE VARIABLE FOR TRADING STEPS
 
+  // scope.trades = [{ROI_of_trade: 98.22386956952988
+	// description: "Trade BTCUSDT & BTCAUD at binance & coinjar"
+	// display_ROI: "98.2%"
+	// first:
+	// buy:
+	// asset: "BTC"
+	// price: "8658.42000000"
+	// quantity: 0.5740249668797938
+	// __proto__: Object
+	// exchange: "binance"
+	// indexTradeData: null
+	// sell:
+	// asset: "USDT"
+	// price: 0.00011549451285569422
+	// quantity: 4970.149253731344
+	// __proto__: Object
+	// symbol: "BTCUSDT"
+	// time: 1559538833853
+	// __proto__: Object
+	// profitable: true}]
+
   $scope.tradeStepsToDisplay = function (item) {
 
-  		console.log("get Right Graph Data is getting called", $scope)
-	  	var output = {}
+  		// console.log("get Right tradeStepsToDisplay is getting called", $scope.trades)
+	  	var output = []
+
+	  	// element format
+	  	// {
+	  		// buy : {
+	  		// 	asset: 
+	  		// 	price: 
+	  		// 	quantity: xxx
+	  		// }
+	  	// }
 
 		if ($scope.trades[tradeDataPoint].first) {
-		
-		  	var firstExchange = $scope.trades[tradeDataPoint].first.exchange;
-		  	var firstExchangeTradingTime = $scope.trades[tradeDataPoint].first.time;
-		  	var firstExchangeTradingSymbol = $scope.trades[tradeDataPoint].first.symbol;
 
-		  	// get the 9 data points for labels
-	  		output[firstExchange] = getTradingData(firstExchange, firstExchangeTradingTime, firstExchangeTradingSymbol)
-	  		console.log("I am output for first", output)
+			output.push($scope.trades[tradeDataPoint].first)
+		  	// var firstExchange = $scope.trades[tradeDataPoint].first.exchange;
+		  	// var firstExchangeFirstBuySymbol = $scope.trades[tradeDataPoint].first.buy.asset;
+		  	// var firstExchangeFirstBuySymbol = $scope.trades[tradeDataPoint].first.buy.asset;
+
+
+	  		// console.log("I am output for first", output)
 	  	
 	  	} else {
 	  		
@@ -416,29 +446,25 @@ app.controller("LineCtrl", function ($scope) {
 
 	  	if ($scope.trades[tradeDataPoint].second) {
 	  		
-	  		var secondExchange = $scope.trades[tradeDataPoint].second.exchange
-	  		var secondExchangeTradingTime = $scope.trades[tradeDataPoint].second.time
-		  	var secondExchangeTradingSymbol = $scope.trades[tradeDataPoint].second.symbol;
+			output.push($scope.trades[tradeDataPoint].second)
 
-	  		output[secondExchange] = getTradingData(secondExchange, secondExchangeTradingTime, secondExchangeTradingSymbol)
-	  		console.log("I am output for second", output)
 	  	
 	  	} else {
 	  		return 
 	  	}
 
 	  	if ($scope.trades[tradeDataPoint].third) {
-	  		var thirdExchange = $scope.trades[tradeDataPoint].third.exchange
-	  		var thirdExchangeTradingTime = $scope.trades[tradeDataPoint].third.time
-		  	var thirdExchangeTradingSymbol = $scope.trades[tradeDataPoint].third.symbol;
+			output.push($scope.trades[tradeDataPoint].third)
 
-	  		output[thirdExchange] = getTradingData(thirdExchange, thirdExchangeTradingTime, thirdExchangeTradingSymbol)
-	  		console.log("I am output for third", output)
 
 	  	} else {
 	  		console.log("no third exchange")
 	  	}
+
+	  	console.log("output for tradeStepsToDisplay", output)
 	  	
+	  	return output;
+
   }
 
 
