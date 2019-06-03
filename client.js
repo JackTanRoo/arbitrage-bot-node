@@ -151,7 +151,7 @@ app.controller('homeController', function($scope, SocketService, $interval, util
 app.controller("LineCtrl", function ($scope) {
 
   $scope.onHover = function (points, evt) {
-    console.log(points, evt);
+    // console.log(points, evt);
   };
   
   // x axis for time series
@@ -269,7 +269,10 @@ app.controller("LineCtrl", function ($scope) {
 		$scope.series = dataOutput.series
 		$scope.data = dataOutput.data
 
+		$scope.tradeStepsToDisplay(item)
 	}
+
+
 
 
   // get the right exchanges, get the right time of the trade, get the 4 data points to either side of the trade
@@ -364,6 +367,8 @@ app.controller("LineCtrl", function ($scope) {
   //   [28, 48, 40, 19, 86, 27, 90]
   // ];
 
+  // SCOPE VARIABLE FOR GRAPHS
+
   $scope.datasetOverride = [{ yAxisID: 'y-axis-1' }, { yAxisID: 'y-axis-2' }];
   
   $scope.options = {
@@ -384,6 +389,59 @@ app.controller("LineCtrl", function ($scope) {
       ]
     }
   };
+
+
+  // SCOPE VARIABLE FOR TRADING STEPS
+
+  $scope.tradeStepsToDisplay = function (item) {
+
+  		console.log("get Right Graph Data is getting called", $scope)
+	  	var output = {}
+
+		if ($scope.trades[tradeDataPoint].first) {
+		
+		  	var firstExchange = $scope.trades[tradeDataPoint].first.exchange;
+		  	var firstExchangeTradingTime = $scope.trades[tradeDataPoint].first.time;
+		  	var firstExchangeTradingSymbol = $scope.trades[tradeDataPoint].first.symbol;
+
+		  	// get the 9 data points for labels
+	  		output[firstExchange] = getTradingData(firstExchange, firstExchangeTradingTime, firstExchangeTradingSymbol)
+	  		console.log("I am output for first", output)
+	  	
+	  	} else {
+	  		
+	  		return
+	  	
+	  	}
+
+	  	if ($scope.trades[tradeDataPoint].second) {
+	  		
+	  		var secondExchange = $scope.trades[tradeDataPoint].second.exchange
+	  		var secondExchangeTradingTime = $scope.trades[tradeDataPoint].second.time
+		  	var secondExchangeTradingSymbol = $scope.trades[tradeDataPoint].second.symbol;
+
+	  		output[secondExchange] = getTradingData(secondExchange, secondExchangeTradingTime, secondExchangeTradingSymbol)
+	  		console.log("I am output for second", output)
+	  	
+	  	} else {
+	  		return 
+	  	}
+
+	  	if ($scope.trades[tradeDataPoint].third) {
+	  		var thirdExchange = $scope.trades[tradeDataPoint].third.exchange
+	  		var thirdExchangeTradingTime = $scope.trades[tradeDataPoint].third.time
+		  	var thirdExchangeTradingSymbol = $scope.trades[tradeDataPoint].third.symbol;
+
+	  		output[thirdExchange] = getTradingData(thirdExchange, thirdExchangeTradingTime, thirdExchangeTradingSymbol)
+	  		console.log("I am output for third", output)
+
+	  	} else {
+	  		console.log("no third exchange")
+	  	}
+	  	
+  }
+
+
 
 
 });
