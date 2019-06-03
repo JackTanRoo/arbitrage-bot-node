@@ -193,14 +193,26 @@ app.controller("LineCtrl", function ($scope) {
   	if (wholeArray.length <= elementsOnEitherSide * 2) {
   		// console.log("I am in for loop", wholeArray, elementsOnEitherSide)
   		for (var i = 0; i < wholeArray.length; i ++) {
-  			output.push(wholeArray[i][attrName])
+
+  			// make time for human readable
+  			if (attrName == "time") {
+  				output.push(moment.unix(wholeArray[i][attrName]).format("h:mm:ss"))	
+  			} else {
+  				output.push(wholeArray[i][attrName])
+  			}
+
   		}
   	} else {
 		while (counter >= -1 * elementsOnEitherSide ) { 
 	  		// console.log("In while loop", wholeArray, counter, elementsOnEitherSide, elementIndex, wholeArray[elementIndex - counter])
 
 			if (wholeArray[elementIndex - counter] && wholeArray[elementIndex - counter][attrName] ) {
-		  		output.push(wholeArray[elementIndex - counter][attrName]);
+		  		
+		  		if (attrName == "time") {
+	  				output.push(moment.unix(wholeArray[elementIndex - counter][attrName]).format("HH:mm:ss"))	
+	  			} else {
+	  				output.push(moment.unix(wholeArray[elementIndex - counter][attrName]))
+	  			}
 		  		// console.log("in the if statement", output)
 			}
 	  		// counter starts as positive and iterates down by 1
@@ -312,6 +324,7 @@ app.controller("LineCtrl", function ($scope) {
 	  	console.log("I am output", output, firstExchange, secondExchange, thirdExchange);
 	  	// NOTE - NEED TO ADD LOGIC FOR THIRD EXCHANGE
 
+
 	  	var dataOutput = {
 	  		labels : output[firstExchange].time,
 
@@ -328,7 +341,7 @@ app.controller("LineCtrl", function ($scope) {
 
 	  	}
 	  	return dataOutput;
-  }
+	  }
 
 
 
