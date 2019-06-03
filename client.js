@@ -414,7 +414,7 @@ app.controller("LineCtrl", function ($scope) {
 		// __proto__: Object
 	// profitable: true}]
 
-  $scope.tradeStepsToDisplay = function (item) {
+  $scope.tradeStepsToDisplay = function (tradeDataPoint) {
 
   		// console.log("get Right tradeStepsToDisplay is getting called", $scope.trades)
 	  	var output = {
@@ -467,7 +467,7 @@ app.controller("LineCtrl", function ($scope) {
 	  	}
 
 		output.summary = {
-			ROI_of_trade: $scope.trades[tradeDataPoint].display_ROI, 
+			display_ROI: $scope.trades[tradeDataPoint].display_ROI, 
 			quantity_fiat: "TBD"
 		}
 
