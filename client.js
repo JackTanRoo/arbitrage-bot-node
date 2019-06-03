@@ -199,6 +199,7 @@ app.controller("LineCtrl", function ($scope) {
   				output.push(moment.unix(wholeArray[i][attrName]).format("h:mm:ss"))	
   			} else {
   				output.push(wholeArray[i][attrName])
+  				console.log(" I am in price", output)
   			}
 
   		}
@@ -211,7 +212,9 @@ app.controller("LineCtrl", function ($scope) {
 		  		if (attrName == "time") {
 	  				output.push(moment.unix(wholeArray[elementIndex - counter][attrName]).format("HH:mm:ss"))	
 	  			} else {
-	  				output.push(moment.unix(wholeArray[elementIndex - counter][attrName]))
+	  				output.push(wholeArray[elementIndex - counter][attrName])
+	  				console.log(" I am in price", output)
+
 	  			}
 		  		// console.log("in the if statement", output)
 			}
@@ -237,18 +240,20 @@ app.controller("LineCtrl", function ($scope) {
   	};
 
   	var interim = [];
-	console.log("I am out side for loop", $scope.trading_data[exchangeName], tradingTime)
+	// console.log("I am out side for loop", $scope.trading_data[exchangeName], tradingTime)
 
   	for (var i = 0; i < $scope.trading_data[exchangeName][symbol].length; i ++) {
-  		console.log("I am in for loop")
+  		// console.log("I am in for loop")
   		if ($scope.trading_data[exchangeName][symbol][i].time == tradingTime) {
   			// push the 4 data points on either side of the element
-  			console.log("I am in if statement")
+  			// console.log("I am in if statement")
   			output.time = returnArray(4, i, $scope.trading_data[exchangeName][symbol], "time");
   			output.price = returnArray(4, i, $scope.trading_data[exchangeName][symbol], "price")
   		
   		}
   	}
+
+  	console.log("output for getTradingData", output);
 
   	return output;
 
