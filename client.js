@@ -186,11 +186,29 @@ app.controller("LineCtrl", function ($scope) {
   	var output = []
 
   	var counter = elementsOnEitherSide;
+  	console.log("I am in return array", wholeArray)
 
-  	while (counter >= -1 * elementsOnEitherSide ) {
-  		output.push(wholeArray[elementIndex - counter][attrName]);
-  		counter--;
+  	// if the length of the array is shorter than the elements On either Side would require, then return the full array
+
+  	if (wholeArray.length <= elementsOnEitherSide * 2) {
+  		console.log("I am in for loop", wholeArray, elementsOnEitherSide)
+  		for (var i = 0; i < wholeArray.length; i ++) {
+  			output.push(wholeArray[i][attrName])
+  		}
+  	} else {
+		while (counter >= -1 * elementsOnEitherSide ) { 
+	  		console.log("In while loop", wholeArray, counter, elementsOnEitherSide, elementIndex, wholeArray[elementIndex - counter])
+
+			if (wholeArray[elementIndex - counter] && wholeArray[elementIndex - counter][attrName] ) {
+		  		output.push(wholeArray[elementIndex - counter][attrName]);
+		  		console.log("in the if statement", output)
+			}
+	  		// counter starts as positive and iterates down by 1
+	  		// whilst counter is higher than 
+	  		counter = counter - 1;
+	  	}
   	}
+
   	return output;
   }
 
