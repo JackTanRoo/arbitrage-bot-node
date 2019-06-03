@@ -398,26 +398,31 @@ app.controller("LineCtrl", function ($scope) {
 	// display_ROI: "98.2%"
 	// first:
 	// buy:
-	// asset: "BTC"
-	// price: "8658.42000000"
-	// quantity: 0.5740249668797938
-	// __proto__: Object
-	// exchange: "binance"
-	// indexTradeData: null
-	// sell:
-	// asset: "USDT"
-	// price: 0.00011549451285569422
-	// quantity: 4970.149253731344
-	// __proto__: Object
-	// symbol: "BTCUSDT"
-	// time: 1559538833853
-	// __proto__: Object
+		// asset: "BTC"
+		// price: "8658.42000000"
+		// quantity: 0.5740249668797938
+		// __proto__: Object
+		// exchange: "binance"
+		// indexTradeData: null
+		// sell:
+		// asset: "USDT"
+		// price: 0.00011549451285569422
+		// quantity: 4970.149253731344
+		// __proto__: Object
+		// symbol: "BTCUSDT"
+		// time: 1559538833853
+		// __proto__: Object
 	// profitable: true}]
 
   $scope.tradeStepsToDisplay = function (item) {
 
   		// console.log("get Right tradeStepsToDisplay is getting called", $scope.trades)
-	  	var output = []
+	  	var output = {
+	  		steps: [],
+	  		summary: {
+
+	  		}
+	  	}
 
 	  	// element format
 	  	// {
@@ -430,7 +435,7 @@ app.controller("LineCtrl", function ($scope) {
 
 		if ($scope.trades[tradeDataPoint].first) {
 
-			output.push($scope.trades[tradeDataPoint].first)
+			output.steps.push($scope.trades[tradeDataPoint].first)
 		  	// var firstExchange = $scope.trades[tradeDataPoint].first.exchange;
 		  	// var firstExchangeFirstBuySymbol = $scope.trades[tradeDataPoint].first.buy.asset;
 		  	// var firstExchangeFirstBuySymbol = $scope.trades[tradeDataPoint].first.buy.asset;
@@ -446,7 +451,7 @@ app.controller("LineCtrl", function ($scope) {
 
 	  	if ($scope.trades[tradeDataPoint].second) {
 	  		
-			output.push($scope.trades[tradeDataPoint].second)
+			output.steps.push($scope.trades[tradeDataPoint].second)
 
 	  	
 	  	} else {
@@ -454,12 +459,17 @@ app.controller("LineCtrl", function ($scope) {
 	  	}
 
 	  	if ($scope.trades[tradeDataPoint].third) {
-			output.push($scope.trades[tradeDataPoint].third)
+			output.steps.push($scope.trades[tradeDataPoint].third)
 
 
 	  	} else {
 	  		console.log("no third exchange")
 	  	}
+
+		output.summary = {
+			ROI_of_trade: $scope.trades[tradeDataPoint].display_ROI, 
+			quantity_fiat: "TBD"
+		}
 
 	  	console.log("output for tradeStepsToDisplay", output)
 	  	

@@ -164,20 +164,20 @@
 
         <div class="row statcards ">
           
-          <div class="col-md-6 col-lg-3 mb-5 mb-md-3">
+          <div class="col-md-6 col-lg-3 mb-5 mb-md-3" ng-repeat="step in tradeSteps.steps">
             <div class="statcard statcard-primary p-4" style='min-height:180px'>
               <div class="p-a">
                 <span class="statcard-desc">Buy</span>
                 <br>
                 <h4 class="statcard-number">
-                 1.1 BTC
+                 {{step.buy.quantity}} {{step.buy.asset}}
                 </h4>
-                <span class="statcard-desc">for 100USDT at Binance</span>
+                <span class="statcard-desc">for {{step.sell.quantity}} {{step.sell.asset}} at {{step.exchange}}</span>
               </div>
             </div>
           </div>
           <!-- <div class="col-md-6 col-lg-3 mb-5 mb-md-3"> -->
-          <div class="col-md-6 col-lg-3 mb-5 mb-md-3">
+<!--           <div class="col-md-6 col-lg-3 mb-5 mb-md-3">
             <div class="statcard statcard-primary p-4" style='min-height:180px'>
               <div class="p-a">
                 <span class="statcard-desc">Buy</span>
@@ -202,16 +202,16 @@
               </div>
             </div>
           </div>
-
+ -->
           <div class="col-md-6 col-lg-3 mb-5 mb-md-3">
             <div class="statcard statcard-success p-4" style='min-height:180px'>
               <div class="p-a">
                 <span class="statcard-desc">Return</span>
                 <h4 class="statcard-number">
-                  3.1% 
+                  {{ tradeSteps.summary.display_ROI }} 
                   
                 </h4>
-                <span class="statcard-desc">$103.1 for $100 invested</span>
+                <span class="statcard-desc">{{ tradeSteps.summary.quantity_fiat }} for $100 invested</span>
 
               </div>
             </div>
