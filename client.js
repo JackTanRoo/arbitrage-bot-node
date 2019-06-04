@@ -466,12 +466,16 @@ app.controller("LineCtrl", function ($scope) {
 	  		console.log("no third exchange")
 	  	}
 
+	  	var fiatReturn = Math.round(output.steps[0].sell.quantity * (1 + $scope.trades[tradeDataPoint].ROI_of_trade / 10)) / 10;
+
+	  	console.log("fiatreturn", fiatReturn)
+
 		output.summary = {
 			display_ROI: $scope.trades[tradeDataPoint].display_ROI, 
-			quantity_fiat: "TBD"
+			quantity_fiat: fiatReturn.toLocaleString("en")
 		}
 
-	  	console.log("output for tradeStepsToDisplay", output)
+	  	console.log("output for tradeStepsToDisplay", output, $scope.trades)
 	  	
 	  	return output;
 

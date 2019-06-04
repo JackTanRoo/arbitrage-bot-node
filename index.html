@@ -164,15 +164,41 @@
 
         <div class="row statcards ">
           
-          <div class="col-md-6 col-lg-3 mb-5 mb-md-3" ng-repeat="step in tradeSteps.steps">
+          <div class="col-md-6 col-lg-3 mb-5 mb-md-3">
             <div class="statcard statcard-primary p-4" style='min-height:180px'>
               <div class="p-a">
                 <span class="statcard-desc">Buy</span>
                 <br>
                 <h4 class="statcard-number">
-                 {{step.buy.quantity | number:1 }} {{step.buy.asset}}
+                 {{ tradeSteps.steps[0].buy.quantity | number:1 }} {{tradeSteps.steps[0].buy.asset}}
                 </h4>
-                <span class="statcard-desc">for {{step.sell.quantity | number:1}} {{step.sell.asset}} at {{step.exchange}}</span>
+                <span class="statcard-desc">for {{tradeSteps.steps[0].sell.quantity | number:1}} {{tradeSteps.steps[0].sell.asset}} at {{tradeSteps.steps[0].exchange}}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-3 mb-5 mb-md-3">
+            <div class="statcard statcard-primary p-4" style='min-height:180px'>
+              <div class="p-a">
+                <span class="statcard-desc">Sell</span>
+                <br>
+                <h4 class="statcard-number">
+                 {{ tradeSteps.steps[1].sell.quantity | number:1 }} {{tradeSteps.steps[1].sell.asset}}
+                </h4>
+                <span class="statcard-desc">for {{tradeSteps.steps[1].buy.quantity | number:1}} {{tradeSteps.steps[1].buy.asset}} at {{tradeSteps.steps[1].exchange}}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-3 mb-5 mb-md-3" ng-if="tradeSteps.steps[2] !== undefined">
+            <div class="statcard statcard-primary p-4" style='min-height:180px'>
+              <div class="p-a">
+                <span class="statcard-desc">Buy</span>
+                <br>
+                <h4 class="statcard-number">
+                 {{ tradeSteps.steps[2].buy.quantity | number:1 }} {{tradeSteps.steps[2].buy.asset}}
+                </h4>
+                <span class="statcard-desc">for {{tradeSteps.steps[2].sell.quantity | number:1}} {{tradeSteps.steps[2].sell.asset}} at {{tradeSteps.steps[2].exchange}}</span>
               </div>
             </div>
           </div>
@@ -211,7 +237,7 @@
                   {{ tradeSteps.summary.display_ROI }} 
                   
                 </h4>
-                <span class="statcard-desc">{{ tradeSteps.summary.quantity_fiat }} for $100 invested</span>
+                <span class="statcard-desc">{{ tradeSteps.summary.quantity_fiat }} for {{ tradeSteps.steps[0].sell.quantity | number:1 }} {{tradeSteps.steps[0].sell.asset}} invested</span>
 
               </div>
             </div>
