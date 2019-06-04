@@ -170,7 +170,7 @@
                 <span class="statcard-desc">Buy</span>
                 <br>
                 <h4 class="statcard-number">
-                 {{step.buy.quantity}} {{step.buy.asset}}
+                 {{step.buy.quantity | number:1 }} {{step.buy.asset}}
                 </h4>
                 <span class="statcard-desc">for {{step.sell.quantity}} {{step.sell.asset}} at {{step.exchange}}</span>
               </div>
