@@ -234,7 +234,7 @@ wss.on('connection', function connection(clientsocket) {
 			if (coinjarData["status"] == "continuous") {
 				var coinjarDate = moment(coinjarData.current_time).unix();
 				
-				console.log("coinjardate", coinjarDate)
+				// console.log("coinjardate", coinjarDate)
 				
 				dataJSON = 
 
@@ -245,7 +245,7 @@ wss.on('connection', function connection(clientsocket) {
 						type : "trade",
 						data : {
 							x : coinjarDate,
-							y : coinjarData.last /latestAUDUSDrate
+							y : coinjarData.last / latestAUDUSDrate
 						}	
 					},
 					binance: {
@@ -263,7 +263,7 @@ wss.on('connection', function connection(clientsocket) {
 					handleData(exchangeObjOne, context.selected_trading_pairs.crypto_1, "1m").then(function(success, err){
 
 						if (err) { console.error(err); }
-						binanceData = success
+						// binanceData = success
 						console.log("binance data ", binanceData[0]);	
 
 						newBinanceDate = binanceData[0][0] / 1000 + context.crypto_exchange_parameters.binance.time_sync_adjustment;
@@ -368,14 +368,14 @@ setInterval(function(){
 		    latestAUDUSDrate = currencyObj["quotes"]["USDAUD"]
 
 	    }
-	    console.log(latestAUDUSDrate);
+	    console.log("I just updated the USD rate", latestAUDUSDrate);
 	    // console.log(response.data.explanation);
 	  })
 	  .catch(error => {
 	    console.log(error);
 	  });
 
-}, 5000)
+}, 60000)
 
 
 // format of currency conversion return output
