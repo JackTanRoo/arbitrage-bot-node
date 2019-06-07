@@ -578,7 +578,7 @@ function updateTradingLog (contextTradingObj, exchange, symbol, input){
 	var cleanInput = handleTradeData(exchange, symbol, input)
 	
 	output[exchange][symbol].push(cleanInput);
-	console.log("output", output)
+	// console.log("output", output)
 
 	return output;
 
@@ -611,6 +611,8 @@ function handleTradeData (exchange, symbol, input){
 
 		if (symbol == "BTCAUD" || symbol == "LTCAUD"){
 			output.price = input.price / latestAUDUSDrate;
+			console.log("old price, ", input.price, "new", output.price)
+
 		}
 	};
 
