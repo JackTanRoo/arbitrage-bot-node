@@ -59,7 +59,7 @@ var context = {
 		"fiat_1": "AUD",
 		"fiat_2": "USD"
 	},
-	"marginOfError": 0.02,
+	"marginOfError": 0.01,
 	"amountToTrade": 0.05,
 	"trading_data": {
 		"binance": {
@@ -693,15 +693,15 @@ function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchangeobj2){
 
     var ROI_buy_exchange2 = (estimated_buy_total_price - estimated_sell_total_price) / estimated_sell_total_price * 100;
 
-    if (ROI_buy_exchange1 >=  margin_of_error){
-    	console.log("ROI, sell price, buy price", ROI_buy_exchange1, estimated_buy_total_price, estimated_sell_total_price)
+    if (ROI_buy_exchange1 >=  margin_of_error * 100){
+    	console.log("ROI BUY exchange 1", ROI_buy_exchange1, estimated_buy_total_price, estimated_sell_total_price)
     	output = parseArbitrageObj(exchangeobj1, exchangeobj2, ROI_buy_exchange1, units_to_buy);
     } 
 
 	// IF SELLING EXCHANGE 2
     
-    else if (ROI_buy_exchange2 >=  margin_of_error){
-    	console.log("ROI, sell price, buy price", ROI_buy_exchange2, estimated_sell_total_price, estimated_buy_total_price)
+    else if (ROI_buy_exchange2 >=  margin_of_error * 100){
+    	console.log("ROI SELL exchange 1", ROI_buy_exchange2, estimated_sell_total_price, estimated_buy_total_price)
     	output = parseArbitrageObj(exchangeobj2, exchangeobj1, ROI_buy_exchange2, units_to_buy);
     }
 
