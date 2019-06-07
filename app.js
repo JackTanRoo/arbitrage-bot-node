@@ -400,7 +400,7 @@ io.on('connection', function(client) {
 });
 
 server.listen(port, function () {
-    console.log('node.js static server listening on port: ' + port + ", WHAT IS LOVE with websockets listener")
+    console.log('node.js static server listening on port: ' + port)
 });
 
 // const wss = new WebSocket.Server({ server });
@@ -481,6 +481,8 @@ coinjarWss.on("open", function connection(socket){
     coinjarWss.on('error', function (evt) {
         console.log("error!!", evt)
     });
+
+    // subscribe to coinjar channels
 
     coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["BTCAUD"]));
     coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["channel_sub"]["LTCAUD"]));
@@ -608,7 +610,7 @@ function handleTradeData (exchange, symbol, input){
 		output.quantity = input.size
 
 		if (symbol == "BTCAUD" || symbol == "LTCAUD"){
-			output.price = input.price * latestAUDUSDrate;
+			output.price = input.price / latestAUDUSDrate;
 		}
 	};
 
