@@ -59,7 +59,7 @@ var context = {
 		"fiat_1": "AUD",
 		"fiat_2": "USD"
 	},
-	"marginOfError": 0.01,
+	"marginOfError": 0.02,
 	"amountToTrade": 0.05,
 	"trading_data": {
 		"binance": {
@@ -508,7 +508,7 @@ coinjarWss.on("open", function connection(socket){
 
 setInterval(function(){
 
-	console.log("trying to send binance heartbeat", context.trading_data)
+	// console.log("trying to send binance heartbeat", context.trading_data)
 
 	binance.websockets.trades([
 		context["crypto_exchange_parameters"]["binance"]["channel_sub"]["BTCUSDT"],
