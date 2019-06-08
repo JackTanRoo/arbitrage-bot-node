@@ -539,9 +539,9 @@ setInterval(function(){
 
 				lenOfAllTrades = context.arbitrage_opportunities.allOpportunities.length;
 
-				// only push a trade into the trades array if the ROI is unique
+				// only push a trade into the trades array if the ROI is unique (to 1 decimal place)
 
-				if (currentTrade.ROI_of_trade != context.arbitrage_opportunities.allOpportunities[lenOfAllTrades - 1].ROI_of_trade) {
+				if (Math.round( currentTrade.ROI_of_trade * 10 ) / 10  != Math.round(context.arbitrage_opportunities.allOpportunities[lenOfAllTrades - 1].ROI_of_trade * 10) / 10) {
 					console.log("I am latest trade", currentTrade);
 					context.arbitrage_opportunities.allOpportunities.push(currentTrade)
 				}
