@@ -11,6 +11,9 @@ const binance = require('node-binance-api')().options({
   useServerTime: true // If you get timestamp errors, synchronize to server time at startup
 });
 
+var currentTrade;
+var lenOfAllTrades;
+
 var latestAUDUSDrate = 1.4;
 
 var context = {
@@ -458,7 +461,7 @@ coinjarWss.on("open", function connection(socket){
 	// get message from coinjar Socket
 
 	coinjarWss.on('message', function incoming(message) {
-		console.log("received message", message)
+		// console.log("received message", message)
 		coinjarDataObj = JSON.parse(message);
 		coinjarData = coinjarDataObj["payload"];
 		
@@ -530,10 +533,18 @@ setInterval(function(){
 				[context.trading_data.coinjar[coinJarOppositePair]
 				.length-1]).profitable)
 			{
-				context.arbitrage_opportunities.allOpportunities.push( 
-					isTwoWayArbitrage(1, 
+				currentTrade = isTwoWayArbitrage(1, 
 					context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1], 
-					context.trading_data.coinjar[coinJarOppositePair][context.trading_data.coinjar[coinJarOppositePair].length-1]))
+					context.trading_data.coinjar[coinJarOppositePair][context.trading_data.coinjar[coinJarOppositePair].length-1])
+
+				lenOfAllTrades = context.arbitrage_opportunities.allOpportunities.length;
+
+				// only push a trade into the trades array if the ROI is unique
+
+				if (currentTrade.ROI_of_trade != context.arbitrage_opportunities.allOpportunities[lenOfAllTrades - 1].ROI_of_trade) {
+					console.log("I am latest trade", currentTrade);
+					context.arbitrage_opportunities.allOpportunities.push(currentTrade)
+				}
 
 				// console.log("there is a profitable trade", context.arbitrage_opportunities)
 			}
@@ -611,7 +622,7 @@ function handleTradeData (exchange, symbol, input){
 
 		if (symbol == "BTCAUD" || symbol == "LTCAUD"){
 			output.price = input.price / latestAUDUSDrate;
-			console.log("old price, ", input.price, "new", output.price)
+			// console.log("old price, ", input.price, "new", output.price)
 
 		}
 	};
@@ -694,14 +705,14 @@ function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchangeobj2){
     var ROI_buy_exchange2 = (estimated_buy_total_price - estimated_sell_total_price) / estimated_sell_total_price * 100;
 
     if (ROI_buy_exchange1 >=  margin_of_error * 100){
-    	console.log("ROI BUY exchange 1", ROI_buy_exchange1, estimated_buy_total_price, estimated_sell_total_price)
+    	// console.log("ROI BUY exchange 1", ROI_buy_exchange1, estimated_buy_total_price, estimated_sell_total_price)
     	output = parseArbitrageObj(exchangeobj1, exchangeobj2, ROI_buy_exchange1, units_to_buy);
     } 
 
 	// IF SELLING EXCHANGE 2
     
     else if (ROI_buy_exchange2 >=  margin_of_error * 100){
-    	console.log("ROI SELL exchange 1", ROI_buy_exchange2, estimated_sell_total_price, estimated_buy_total_price)
+    	// console.log("ROI SELL exchange 2", ROI_buy_exchange2, estimated_sell_total_price, estimated_buy_total_price)
     	output = parseArbitrageObj(exchangeobj2, exchangeobj1, ROI_buy_exchange2, units_to_buy);
     }
 
