@@ -545,7 +545,7 @@ setInterval(function(){
 				// only push a trade into the trades array if the ROI is unique (to 1 decimal place)
 
 				if (Math.round( currentTrade.ROI_of_trade * 10 ) / 10  != Math.round(context.arbitrage_opportunities.allOpportunities[lenOfAllTrades - 1].ROI_of_trade * 10) / 10) {
-					console.log("I am latest trade", currentTrade);
+					// console.log("I am latest trade", currentTrade);
 					context.arbitrage_opportunities.allOpportunities.push(currentTrade)
 				}
 
@@ -569,8 +569,10 @@ setInterval(function(){
 
 	axios.get(currency_conversion_endpoint)
 	  .then(response => {
-	  	console.log("Forex Data type", response.data.rates.USD)
+	  	console.log("Forex Data RECEIVED; old rate + new rate in AUD / USD", latestAUDUSDrate, response.data.rates.USD)
 	  	latestAUDUSDrate = 1 / response.data.rates.USD;
+	  	console.log("new rate in USD / AUD", latestAUDUSDrate)
+
 	  })
 	  .catch(error => {
 	    console.log(error);
