@@ -377,15 +377,18 @@ io.on('connection', function(client) {
 
     	var len = context["arbitrage_opportunities"].allOpportunities.length;
 
-    	if ( len >= 3) {
+    	// send the last 5 trades
+
+    	if ( len >= 4) {
 
     		lastTrades = [
 	    		context["arbitrage_opportunities"].allOpportunities[len-1],
 	    		context["arbitrage_opportunities"].allOpportunities[len-2],
-	    		context["arbitrage_opportunities"].allOpportunities[len-3]
+	    		context["arbitrage_opportunities"].allOpportunities[len-3],
+	    		context["arbitrage_opportunities"].allOpportunities[len-4]
 	    	]
     	
-    	}
+    	} 
     	
     	// console.log("newOpportunities", lastTrades)
 
