@@ -100,7 +100,7 @@ var context = {
 			[
 				{
 				symbol: "BTCAUD",
-				time: Date.now(),
+				time: Date.now() ,
 				price: 9900,
 				quantity: 1,
 				exchange: "coinjar" 
@@ -109,7 +109,7 @@ var context = {
 			"ZECBTC" : [
 				{
 				symbol: "ZECBTC",
-				time: Date.now(),
+				time: Date.now() ,
 				price: 0.009,
 				quantity: 1,
 				exchange: "coinjar" 
@@ -118,7 +118,7 @@ var context = {
 			"LTCAUD" : [
 				{
 				symbol: "LTCAUD",
-				time: Date.now(),
+				time: Date.now() ,
 				price: 121,
 				quantity: 1,
 				exchange: "coinjar" 
@@ -480,11 +480,12 @@ coinjarWss.on("open", function connection(socket){
 					context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[i])
 				}
 
-				if (coinjarDataObj.topic =="trades:ZECBTC") {
-					console.log("coinjar trading data for ZEC", JSON.stringify(coinjarDataObj))	
-					console.log("ZEC for coinjar during init", context.trading_data.coinjar.ZECBTC)
+				// if (coinjarDataObj.topic =="trades:ZECBTC") {
+				// 	// console.log("coinjar trading data for ZEC", JSON.stringify(coinjarDataObj))	
+				// 	// console.log("ZEC for coinjar during init", context.trading_data.coinjar.ZECBTC)
 
-				}
+
+				// }
 
 			} else if (coinjarDataObj["event"] == "new") {
 				
@@ -548,7 +549,7 @@ setInterval(function(){
 			
 			var coinJarOppositePair = context.twoWayLookup[trades.s];
 			var lastTrade = context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1]
-
+			// console.log("binance last trade", lastTrade)
 			if (isTwoWayArbitrage(1, 
 				context.trading_data.binance[trades.s]
 				[context.trading_data.binance[trades.s].length-1], 
@@ -592,13 +593,13 @@ setInterval(function(){
 	  	// console.log("Forex Data RECEIVED; old rate + new rate in AUD / USD", latestAUDUSDrate, response.data.rates.USD)
 	  	latestAUDUSDrate = 1 / response.data.rates.USD;
 	  	// console.log("new rate in USD / AUD", latestAUDUSDrate)
-
+	  	console.log("context trading_data", JSON.stringify(context.trading_data))
 	  })
 	  .catch(error => {
 	    console.log(error);
 	  });
 
-}, 20000)
+}, 5000)
 
 
 // update the context variable with latest trade data and format into the same format
@@ -642,7 +643,7 @@ function handleTradeData (exchange, symbol, input){
 
 	if (exchange == "coinjar") {
 		output.symbol = symbol;
-		output.time = moment(input.timestamp).unix();;
+		output.time = moment(input.timestamp).unix() * 1000;
 		output.quantity = input.size
 
 		if (symbol == "BTCAUD" || symbol == "LTCAUD"){
