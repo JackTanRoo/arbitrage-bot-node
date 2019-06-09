@@ -546,6 +546,10 @@ setInterval(function(){
 
 			let {e:eventType, E:eventTime, s:symbol, p:price, q:quantity, m:maker, a:tradeId} = trades;
 			context.trading_data = updateTradingLog(context.trading_data, "binance", trades.s, trades);
+
+			if (trades.s == "ZECBTC") {
+				console.log("I am binance trades", trades, "coinjar",context.trading_data.coinjar.ZECBTC, "binance", context.trading_data.binance.ZECBTC)
+			}
 			
 			var coinJarOppositePair = context.twoWayLookup[trades.s];
 			var lastTrade = context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1]
@@ -593,7 +597,7 @@ setInterval(function(){
 	  	// console.log("Forex Data RECEIVED; old rate + new rate in AUD / USD", latestAUDUSDrate, response.data.rates.USD)
 	  	latestAUDUSDrate = 1 / response.data.rates.USD;
 	  	// console.log("new rate in USD / AUD", latestAUDUSDrate)
-	  	console.log("context trading_data", JSON.stringify(context.trading_data))
+	  	// console.log("context trading_data", JSON.stringify(context.trading_data))
 	  })
 	  .catch(error => {
 	    console.log(error);
