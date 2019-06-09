@@ -113,6 +113,9 @@ app.controller('homeController', function($scope, SocketService, $interval, util
 
     });
 
+
+    // send ping to server to ask for new opportunities
+    
     $interval(function(){
     	console.log("emitting new opps")
     	SocketService.emit('newOpportunities', {
