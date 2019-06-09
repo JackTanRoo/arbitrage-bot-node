@@ -448,7 +448,7 @@ coinjarWss.on("open", function connection(socket){
 
 	// set heartbeat every 40 seconds - coinjar requires every 45 seconds
 	setInterval(function(){
-		console.log("trying to send a heartbeat")
+		// console.log("trying to send a heartbeat")
 		
         coinjarWss.send(JSON.stringify(context["crypto_exchange_parameters"]["coinjar"]["heartbeat_message"]));
 
@@ -470,12 +470,32 @@ coinjarWss.on("open", function connection(socket){
 		
 		if (coinjarDataObj["topic"] !== "phoenix") {
 			if (coinjarDataObj["event"] == "init") {
+
+				// first trading log event
+
+
+				
+				
 				for (var i = 0; i < coinjarDataObj.payload.trades.length; i ++){					
 					context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[i])
 				}
+
+				if (coinjarDataObj.topic =="trades:ZECBTC") {
+					console.log("coinjar trading data for ZEC", JSON.stringify(coinjarDataObj))	
+					console.log("ZEC for coinjar during init", context.trading_data.coinjar.ZECBTC)
+
+				}
+
 			} else if (coinjarDataObj["event"] == "new") {
-				console.log("IAM DATA OBJ", coinjarDataObj.payload.trades[0])
+				
+				// updated trading 
+
+				// console.log("IAM DATA OBJ", coinjarDataObj.payload.trades[0])
 				context.trading_data = updateTradingLog(context.trading_data, "coinjar", coinjarDataObj.topic.substr(7, coinjarDataObj.topic.length-7), coinjarDataObj.payload.trades[0])
+				
+				// console.log("ZEC for coinjar during subsequent", context.trading_data.coinjar.ZECBTC)
+				// console.log("ZEC for binance during subsequent", context.trading_data.binance.ZECBTC)
+			
 			}
 		}
 	});
@@ -569,9 +589,9 @@ setInterval(function(){
 
 	axios.get(currency_conversion_endpoint)
 	  .then(response => {
-	  	console.log("Forex Data RECEIVED; old rate + new rate in AUD / USD", latestAUDUSDrate, response.data.rates.USD)
+	  	// console.log("Forex Data RECEIVED; old rate + new rate in AUD / USD", latestAUDUSDrate, response.data.rates.USD)
 	  	latestAUDUSDrate = 1 / response.data.rates.USD;
-	  	console.log("new rate in USD / AUD", latestAUDUSDrate)
+	  	// console.log("new rate in USD / AUD", latestAUDUSDrate)
 
 	  })
 	  .catch(error => {
@@ -626,9 +646,15 @@ function handleTradeData (exchange, symbol, input){
 		output.quantity = input.size
 
 		if (symbol == "BTCAUD" || symbol == "LTCAUD"){
+
+			// note that in our Trading Logs, all trading data is quoted in USD even though the symbol quotes AUD
+			
 			output.price = input.price / latestAUDUSDrate;
 			// console.log("old price, ", input.price, "new", output.price)
 
+		} else {
+			// accounts for ZEC BTC pair
+			output.price = input.price
 		}
 	};
 
