@@ -62,6 +62,7 @@ var context = {
 		"fiat_1": "AUD",
 		"fiat_2": "USD"
 	},
+	"actionableTradeTime": 60*1000*10, // 10 minute actionable trading time
 	"marginOfError": 0.01,
 	"amountToTrade": 0.05,
 	"trading_data": {
@@ -548,12 +549,14 @@ setInterval(function(){
 			context.trading_data = updateTradingLog(context.trading_data, "binance", trades.s, trades);
 
 			if (trades.s == "ZECBTC") {
-				console.log("I am binance trades", trades, "coinjar",context.trading_data.coinjar.ZECBTC, "binance", context.trading_data.binance.ZECBTC)
+				console.log("I am binance trades", "coinjar",context.trading_data.coinjar.ZECBTC, "binance", context.trading_data.binance.ZECBTC)
 			}
 			
 			var coinJarOppositePair = context.twoWayLookup[trades.s];
 			var lastTrade = context.trading_data.binance[trades.s][context.trading_data.binance[trades.s].length-1]
 			// console.log("binance last trade", lastTrade)
+
+
 			if (isTwoWayArbitrage(1, 
 				context.trading_data.binance[trades.s]
 				[context.trading_data.binance[trades.s].length-1], 
@@ -710,6 +713,9 @@ function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchangeobj2){
 	var price_exchange_one = exchangeobj1.price
 	var price_exchange_two = exchangeobj2.price
 
+	var timeExchangeOne = exchangeobj1.time
+	var timeExchangeTwo = exchangeobj2.time
+
 
 	var exchange_1 = exchangeobj1.exchange
 	var exchange_2 = exchangeobj2.exchange
@@ -732,7 +738,8 @@ function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchangeobj2){
     var estimated_sell_unit_price = price_exchange_two * (1 - context["crypto_exchange_parameters"][exchange_2]['slippage']);
 
 	var estimated_sell_total_price =  units_to_buy * estimated_sell_unit_price * (1 - context["crypto_exchange_parameters"][exchange_2]['fees']);
-    
+
+
 
 	// IF BUYING EXCHANGE 1
 
@@ -740,12 +747,19 @@ function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchangeobj2){
 
     var ROI_buy_exchange2 = (estimated_buy_total_price - estimated_sell_total_price) / estimated_sell_total_price * 100;
 
-    if (ROI_buy_exchange1 >=  margin_of_error * 100){
+    // only proceed if the 2 trades are within 5 seconds apart such that they are still actionable
+
+    if (Math.abs(timeExchangeOne - timeExchangeTwo) >= context.actionableTradeTime) {
+    	console.log("I am in the time check condition", timeExchangeOne, timeExchangeTwo, Math.abs(timeExchangeOne - timeExchangeTwo),exchangeobj1, exchangeobj2);
+    	return output
+    } 
+
+    else if (ROI_buy_exchange1 >=  margin_of_error * 100){
     	// console.log("ROI BUY exchange 1", ROI_buy_exchange1, estimated_buy_total_price, estimated_sell_total_price)
     	output = parseArbitrageObj(exchangeobj1, exchangeobj2, ROI_buy_exchange1, units_to_buy);
     } 
 
-	// IF SELLING EXCHANGE 2
+	// IF BUYING EXCHANGE 2
     
     else if (ROI_buy_exchange2 >=  margin_of_error * 100){
     	// console.log("ROI SELL exchange 2", ROI_buy_exchange2, estimated_sell_total_price, estimated_buy_total_price)
@@ -757,6 +771,10 @@ function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchangeobj2){
 
 
 function parseArbitrageObj (exchange1Obj, exchange2Obj, ROI, units_to_buy){
+	
+	var timeOne = exchange1Obj.time
+
+
 	var output = {
 		profitable : true,
 		trade_id: Object.keys(context.arbitrage_opportunities.allOpportunities).length,
