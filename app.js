@@ -63,7 +63,7 @@ var context = {
 		"fiat_2": "USD"
 	},
 	"actionableTradeTime": 60*1000*90, // 10 minute actionable trading time
-	"marginOfError": 0.001,
+	"marginOfError": 0.005,
 	"amountToTrade": 0.05,
 	"trading_data": {
 		"binance": {
