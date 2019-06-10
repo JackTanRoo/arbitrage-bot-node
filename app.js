@@ -62,8 +62,8 @@ var context = {
 		"fiat_1": "AUD",
 		"fiat_2": "USD"
 	},
-	"actionableTradeTime": 60*1000*10, // 10 minute actionable trading time
-	"marginOfError": 0.01,
+	"actionableTradeTime": 60*1000*90, // 10 minute actionable trading time
+	"marginOfError": 0.001,
 	"amountToTrade": 0.05,
 	"trading_data": {
 		"binance": {
@@ -549,7 +549,7 @@ setInterval(function(){
 			context.trading_data = updateTradingLog(context.trading_data, "binance", trades.s, trades);
 
 			if (trades.s == "ZECBTC") {
-				console.log("I am binance trades", "coinjar",context.trading_data.coinjar.ZECBTC, "binance", context.trading_data.binance.ZECBTC)
+				// console.log("I am binance trades", "coinjar",context.trading_data.coinjar.ZECBTC, "binance", context.trading_data.binance.ZECBTC)
 			}
 			
 			var coinJarOppositePair = context.twoWayLookup[trades.s];
@@ -751,18 +751,22 @@ function isTwoWayArbitrage (volumeToTrade, exchangeobj1, exchangeobj2){
 
     if (Math.abs(timeExchangeOne - timeExchangeTwo) >= context.actionableTradeTime) {
     	console.log("I am in the time check condition", timeExchangeOne, timeExchangeTwo, Math.abs(timeExchangeOne - timeExchangeTwo),exchangeobj1, exchangeobj2);
-    	return output
+    	return {
+    		profitable: false
+    	}
     } 
 
-    else if (ROI_buy_exchange1 >=  margin_of_error * 100){
-    	// console.log("ROI BUY exchange 1", ROI_buy_exchange1, estimated_buy_total_price, estimated_sell_total_price)
+    console.log("past the timne conditione", ROI_buy_exchange1, ROI_buy_exchange2)
+
+    if (ROI_buy_exchange1 >=  margin_of_error * 100){
+    	console.log("ROI BUY exchange 1", ROI_buy_exchange1, estimated_buy_total_price, estimated_sell_total_price)
     	output = parseArbitrageObj(exchangeobj1, exchangeobj2, ROI_buy_exchange1, units_to_buy);
     } 
 
 	// IF BUYING EXCHANGE 2
     
-    else if (ROI_buy_exchange2 >=  margin_of_error * 100){
-    	// console.log("ROI SELL exchange 2", ROI_buy_exchange2, estimated_sell_total_price, estimated_buy_total_price)
+    if (ROI_buy_exchange2 >=  margin_of_error * 100){
+    	console.log("ROI SELL exchange 2", ROI_buy_exchange2, estimated_sell_total_price, estimated_buy_total_price)
     	output = parseArbitrageObj(exchangeobj2, exchangeobj1, ROI_buy_exchange2, units_to_buy);
     }
 
