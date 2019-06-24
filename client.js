@@ -261,7 +261,7 @@ app.controller("LineCtrl", function ($scope) {
   	return output;
 
   }
-
+   
 	$scope.showTradeInfo = function(item){
 		// console.log(" i am in trade info", item)
 		$scope.graphToDisplay = item;
