@@ -23,7 +23,7 @@ app.factory('utilities', function(){
 	var outputObj = {};
 
 	outputObj.calculateTime = function(currentTime, tradeTime) {
-		console.log("calculateTime",currentTime, tradeTime)
+		// console.log("calculateTime",currentTime, tradeTime)
 		if ((currentTime - tradeTime) > 60000 && (currentTime - tradeTime) < 60*60*1000) {
 			var minute = Math.round(((currentTime - tradeTime) / 60000), 0);
 
@@ -53,7 +53,7 @@ app.factory('utilities', function(){
 
 		}
 
-		console.log("I am in update time", output)
+		// console.log("I am in update time", output)
 		return output
 	};
 
@@ -79,7 +79,7 @@ app.factory('utilities', function(){
 	outputObj.updateROI = function (oppsArray){
 
 		var output = oppsArray;
-		console.log("oppsArra", output)
+		// console.log("oppsArra", output)
 
 		for (var i = 0; i < output.length; i++ ) {	
 			output[i].display_ROI = output[i].ROI_of_trade.toFixed(1) + "%"
@@ -117,7 +117,7 @@ app.controller('homeController', function($scope, SocketService, $interval, util
     // send ping to server to ask for new opportunities
     
     $interval(function(){
-    	console.log("emitting new opps")
+    	// console.log("emitting new opps")
     	SocketService.emit('newOpportunities', {
     		roomId:'temp', 
     		data: "hellowwwwwww from client", 
@@ -184,6 +184,7 @@ app.controller("LineCtrl", function ($scope) {
 	// type_of_trade: 2
 // }]
 
+  // PROVIDES AN ARRAY OF ELEMENTS FROM TRADING LOG
 
   function returnArray(elementsOnEitherSide, elementIndex, wholeArray, attrName) {
   	var output = []
@@ -202,7 +203,7 @@ app.controller("LineCtrl", function ($scope) {
   				output.push(moment.unix(wholeArray[i][attrName]).format("h:mm:ss"))	
   			} else {
   				output.push(wholeArray[i][attrName])
-  				console.log(" I am in price", output)
+  				// console.log(" I am in price", output)
   			}
 
   		}
@@ -216,7 +217,7 @@ app.controller("LineCtrl", function ($scope) {
 	  				output.push(moment.unix(wholeArray[elementIndex - counter][attrName]).format("HH:mm:ss"))	
 	  			} else {
 	  				output.push(wholeArray[elementIndex - counter][attrName])
-	  				console.log(" I am in price", output)
+	  				// console.log(" I am in price", output)
 
 	  			}
 		  		// console.log("in the if statement", output)
@@ -256,24 +257,32 @@ app.controller("LineCtrl", function ($scope) {
   		}
   	}
 
-  	console.log("output for getTradingData", output);
+  	// console.log("output for getTradingData", output);
 
   	return output;
 
   }
-   
-	$scope.showTradeInfo = function(item){
+
+  $scope.showTradeInfo = function(item){
 		// console.log(" i am in trade info", item)
 		$scope.graphToDisplay = item;
 
+
+		// trade in question
+		var tradeBeingRecommended = $scope.trades[item]
+		console.log("i am trade being recommended", tradeBeingRecommended);
+		console.log("I am new format of time", moment.unix(tradeBeingRecommended.first.time).format("HH:mm:ss"));
 		// getRightGraphDataPoints(item);
 		var dataOutput = $scope.getRightGraphDataPoints(item);
+
+		console.log("i am dataOutput", dataOutput);
+
 		$scope.labels =  dataOutput.labels
 		$scope.series = dataOutput.series
 		$scope.data = dataOutput.data
 
 		$scope.tradeSteps =	$scope.tradeStepsToDisplay(item);
-	}
+  }
 
 
 
@@ -292,7 +301,7 @@ app.controller("LineCtrl", function ($scope) {
 
 		  	// get the 9 data points for labels
 	  		output[firstExchange] = getTradingData(firstExchange, firstExchangeTradingTime, firstExchangeTradingSymbol)
-	  		console.log("I am output for first", output)
+	  		// console.log("I am output for first", output)
 	  	
 	  	} else {
 	  		
@@ -307,7 +316,7 @@ app.controller("LineCtrl", function ($scope) {
 		  	var secondExchangeTradingSymbol = $scope.trades[tradeDataPoint].second.symbol;
 
 	  		output[secondExchange] = getTradingData(secondExchange, secondExchangeTradingTime, secondExchangeTradingSymbol)
-	  		console.log("I am output for second", output)
+	  		// console.log("I am output for second", output)
 	  	
 	  	} else {
 	  		return 
@@ -319,10 +328,10 @@ app.controller("LineCtrl", function ($scope) {
 		  	var thirdExchangeTradingSymbol = $scope.trades[tradeDataPoint].third.symbol;
 
 	  		output[thirdExchange] = getTradingData(thirdExchange, thirdExchangeTradingTime, thirdExchangeTradingSymbol)
-	  		console.log("I am output for third", output)
+	  		// console.log("I am output for third", output)
 
 	  	} else {
-	  		console.log("no third exchange")
+	  		// console.log("no third exchange")
 	  	}
 
 	  	// output {
@@ -332,7 +341,7 @@ app.controller("LineCtrl", function ($scope) {
 		  	// }
 	  	// };
 
-	  	console.log("I am output", output, firstExchange, secondExchange, thirdExchange);
+	  	// console.log("I am output", output, firstExchange, secondExchange, thirdExchange);
 	  	// NOTE - NEED TO ADD LOGIC FOR THIRD EXCHANGE
 
 
