@@ -234,7 +234,7 @@ app.controller("LineCtrl", function ($scope) {
 
   function getTradingData (exchangeName, tradingTime, symbol){
 	
-	console.log("I am in getTradingData")
+	// console.log("I am in getTradingData")
 
   	var output = {};
 
@@ -290,7 +290,7 @@ app.controller("LineCtrl", function ($scope) {
   // get the right exchanges, get the right time of the trade, get the 4 data points to either side of the trade
 
    $scope.getRightGraphDataPoints = function (tradeDataPoint) {
-	   	console.log("get Right Graph Data is getting called", $scope)
+	   	// console.log("get Right Graph Data is getting called", $scope)
 	  	var output = {}
 
 		if ($scope.trades[tradeDataPoint].first) {
